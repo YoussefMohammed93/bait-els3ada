@@ -54,6 +54,8 @@ const ServicesSection = () => {
                   alt={service.title}
                   fill
                   className="object-contain"
+                  sizes="96px"
+                  loading="lazy"
                 />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">

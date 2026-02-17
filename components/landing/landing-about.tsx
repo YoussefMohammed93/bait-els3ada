@@ -49,6 +49,8 @@ const AboutSection = () => {
                   alt={feature.title}
                   fill
                   className="object-contain"
+                  sizes="80px"
+                  loading="lazy"
                 />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">

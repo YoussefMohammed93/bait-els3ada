@@ -5,7 +5,8 @@ import SmoothScrollProvider from "@/components/smooth-scroll";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
-  weight: ["300", "400", "500", "700", "800", "900"],
+  weight: ["400", "500", "700", "900"],
+  display: "swap",
   variable: "--font-tajawal",
 });
 
@@ -13,6 +14,22 @@ export const metadata: Metadata = {
   title: "بيت السعادة | وجهتك للجمال والتميز",
   description:
     "وجهتك المثالية للميكب والإكسسوارات والهدايا المميزة والمنتجات اليدوية الفريدة. كل ما تحتاجينه لإطلالة ساحرة ولحظات لا تُنسى.",
+  keywords: [
+    "بيت السعادة",
+    "ميكب",
+    "إكسسوارات",
+    "هدايا",
+    "هاند ميد",
+    "طباعة",
+    "شربين",
+  ],
+  openGraph: {
+    title: "بيت السعادة | وجهتك للجمال والتميز",
+    description:
+      "وجهتك المثالية للميكب والإكسسوارات والهدايا المميزة والمنتجات اليدوية الفريدة.",
+    locale: "ar_EG",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -21,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <body className={`${tajawal.variable} antialiased`}>
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>

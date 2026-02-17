@@ -13,6 +13,8 @@ const HeroSection = () => {
           className="object-cover"
           fill
           priority
+          sizes="100vw"
+          quality={80}
         />
         <div className="absolute inset-0 bg-gradient-to-l from-background/95 via-background/90 to-background/70 sm:from-background/95 sm:via-background/85 sm:to-background/40" />
       </div>
