@@ -15,6 +15,15 @@ import { useLenis } from "@/components/smooth-scroll";
 const SiteHeader = () => {
   const lenis = useLenis();
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!lenis) return;
@@ -66,7 +75,13 @@ const SiteHeader = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+    <header
+      className={`sticky top-0 z-50 backdrop-blur-md border-b transition-colors duration-300 ${
+        scrolled
+          ? "bg-background/90 border-border/60"
+          : "bg-background/60 border-transparent"
+      }`}
+    >
       <div className="w-full max-w-[1360px] mx-auto px-4 sm:px-5 flex items-center justify-between h-16">
         <a
           href="#"
@@ -80,12 +95,12 @@ const SiteHeader = () => {
           بيت السعادة
         </a>
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-12 text-sm font-medium text-muted-foreground">
+        <nav className="hidden md:flex items-center gap-8 font-medium text-muted-foreground">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className="hover:text-primary text-lg transition-colors"
+              className="nav-link hover:text-primary text-base transition-colors py-1"
             >
               {link.name}
             </a>
@@ -106,12 +121,12 @@ const SiteHeader = () => {
                 بيت السعادة
               </SheetTitle>
             </SheetHeader>
-            <nav className="flex flex-col gap-6 mt-8">
+            <nav className="flex flex-col gap-1 mt-8">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                  className="text-lg font-medium text-foreground hover:text-primary hover:bg-accent/50 transition-colors rounded-xl px-4 py-3"
                   onClick={(e) => handleLinkClick(e, link.href)}
                 >
                   {link.name}

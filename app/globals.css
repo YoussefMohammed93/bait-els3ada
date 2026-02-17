@@ -77,15 +77,29 @@
     background: linear-gradient(
       180deg,
       hsl(var(--background)) 0%,
-      hsl(var(--blush) / 0.3) 100%
+      hsl(var(--blush) / 0.25) 100%
     );
   }
+}
 
-  .shadow-soft {
-    box-shadow: 0 4px 20px -4px hsl(var(--primary) / 0.15);
-  }
+/* Nav link underline animation */
+.nav-link {
+  position: relative;
+}
 
-  .shadow-card {
-    box-shadow: 0 8px 30px -8px hsl(var(--primary) / 0.12);
-  }
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  right: 50%;
+  height: 2px;
+  background: hsl(var(--primary));
+  transition: all 0.3s ease-in-out;
+  border-radius: 1px;
+}
+
+.nav-link:hover::after {
+  left: 0;
+  right: 0;
 }
