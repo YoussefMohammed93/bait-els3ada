@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
 import {
-  BarChart3,
   LayoutDashboard,
   Package,
   Settings,
@@ -25,6 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 const data = {
   navMain: [
@@ -42,11 +41,6 @@ const data = {
       title: "الطلبات",
       url: "/dashboard/orders",
       icon: ShoppingCart,
-    },
-    {
-      title: "التحليلات",
-      url: "/dashboard/analytics",
-      icon: BarChart3,
     },
     {
       title: "العملاء",
