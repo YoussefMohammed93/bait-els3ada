@@ -4,10 +4,10 @@ import * as React from "react";
 import {
   LayoutDashboard,
   Package,
-  Settings,
   ShoppingCart,
   Users,
   Heart,
+  Grid,
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +33,11 @@ const data = {
       icon: LayoutDashboard,
     },
     {
+      title: "الفئات",
+      url: "/dashboard/categories",
+      icon: Grid,
+    },
+    {
       title: "المنتجات",
       url: "/dashboard/products",
       icon: Package,
@@ -46,13 +51,6 @@ const data = {
       title: "العملاء",
       url: "/dashboard/customers",
       icon: Users,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "الإعدادات",
-      url: "/dashboard/settings",
-      icon: Settings,
     },
   ],
 };
@@ -138,42 +136,6 @@ export function DashboardSidebar({
                   </SidebarMenuItem>
                 );
               })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <div className="px-2 py-4 mt-2">
-          <hr className="border-muted border-dashed" />
-        </div>
-        <SidebarGroup>
-          <SidebarGroupLabel
-            className={cn(
-              "text-muted-foreground font-bold text-xs px-4 mb-2 transition-all duration-300",
-              isCollapsed && "opacity-0",
-            )}
-          >
-            أخرى
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-1 w-full">
-              {data.navSecondary.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    className="h-11 rounded-xl hover:bg-muted"
-                  >
-                    <a
-                      href={item.url}
-                      className="flex items-center gap-3 w-full px-3"
-                    >
-                      <item.icon className="size-5 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <span className="font-bold">{item.title}</span>
-                      )}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
