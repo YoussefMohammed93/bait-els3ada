@@ -46,38 +46,32 @@ const stats = [
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function StatsCards({ month, year }: StatsCardsProps) {
-  // In a real app, you would fetch data here based on month/year
-  // For now, we'll just demonstrate the responsiveness to the prop
-
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {stats.map((stat) => (
         <div
           key={stat.title}
-          className="group relative rounded-3xl border bg-card p-6 transition-all duration-300"
+          className="group relative rounded-3xl border bg-card p-5 transition-all duration-300 hover:border-primary/20"
         >
-          <div className="flex items-center justify-between gap-4 relative z-10">
-            <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-              <stat.icon className="size-6" />
-            </div>
+          <div className="flex items-start gap-5">
             <div
-              className={`px-2 py-1 rounded-lg text-[10px] font-bold ${stat.trend.startsWith("+") ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"}`}
+              className={`p-3.5 rounded-2xl ${stat.bg} ${stat.color} shrink-0`}
             >
-              {stat.trend}
+              <stat.icon className="size-7" />
             </div>
-          </div>
-          <div className="mt-6 space-y-1 relative z-10">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {stat.title}
-            </h3>
-            <div className="flex items-baseline gap-1">
-              <p className="text-3xl font-bold text-foreground tabular-nums tracking-tighter">
-                {stat.value}
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold text-muted-foreground tracking-wide truncate">
+                {stat.title}
+              </h3>
+              <div className="flex items-baseline gap-2 my-1">
+                <p className="text-2xl font-bold text-foreground tabular-nums tracking-tight">
+                  {stat.value}
+                </p>
+              </div>
+              <p className="text-[11px] font-bold text-muted-foreground/60 whitespace-nowrap">
+                {stat.description}
               </p>
             </div>
-            <p className="text-[11px] font-bold text-muted-foreground/80">
-              {stat.description}
-            </p>
           </div>
         </div>
       ))}

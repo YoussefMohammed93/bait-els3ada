@@ -43,7 +43,7 @@ export function RecentOrders() {
   ];
 
   return (
-    <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+    <div className="rounded-2xl border bg-card overflow-hidden">
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <h3 className="text-lg font-bold">آخر الطلبات</h3>
         <a

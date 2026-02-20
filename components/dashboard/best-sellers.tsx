@@ -40,7 +40,7 @@ export function BestSellers() {
   ];
 
   return (
-    <div className="rounded-2xl border bg-card shadow-sm h-full flex flex-col overflow-hidden">
+    <div className="rounded-2xl border bg-card h-full flex flex-col overflow-hidden">
       <div className="px-6 py-4 border-b">
         <h3 className="text-lg font-bold">المنتجات الأكثر مبيعاً</h3>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   LayoutDashboard,
@@ -31,7 +32,6 @@ const data = {
       title: "لوحة التحكم",
       url: "/dashboard",
       icon: LayoutDashboard,
-      isActive: true,
     },
     {
       title: "المنتجات",
@@ -68,6 +68,7 @@ export function DashboardSidebar({
 }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const pathname = usePathname();
 
   return (
     <Sidebar side="right" collapsible="icon" className="border-l" {...props}>
@@ -107,36 +108,42 @@ export function DashboardSidebar({
           </SidebarGroupLabel>
           <SidebarGroupContent className="w-full">
             <SidebarMenu className="gap-1">
-              {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.isActive}
-                    tooltip={item.title}
-                    className={cn(
-                      "transition-all duration-200 h-11 rounded-xl",
-                      item.isActive
-                        ? "bg-primary/10 text-primary hover:bg-primary/15"
-                        : "hover:bg-muted",
-                    )}
-                  >
-                    <a
-                      href={item.url}
-                      className="flex items-center gap-3 w-full px-3"
-                    >
-                      <item.icon
-                        className={cn(
-                          "size-5 flex-shrink-0 transition-transform",
-                          item.isActive && "scale-110",
-                        )}
-                      />
-                      {!isCollapsed && (
-                        <span className="font-bold">{item.title}</span>
+              {data.navMain.map((item) => {
+                const isActive =
+                  item.url === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                      className={cn(
+                        "transition-all duration-200 h-11 rounded-xl",
+                        isActive
+                          ? "bg-primary/10 text-primary hover:bg-primary/15"
+                          : "hover:bg-muted",
                       )}
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                    >
+                      <a
+                        href={item.url}
+                        className="flex items-center gap-3 w-full px-3"
+                      >
+                        <item.icon
+                          className={cn(
+                            "size-5 flex-shrink-0 transition-transform",
+                            isActive && "scale-110",
+                          )}
+                        />
+                        {!isCollapsed && (
+                          <span className="font-bold">{item.title}</span>
+                        )}
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

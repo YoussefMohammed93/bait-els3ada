@@ -110,7 +110,7 @@ export function RevenueChart({ month, year }: RevenueChartProps) {
   }, []);
 
   return (
-    <div className="w-full rounded-2xl border bg-card p-6 shadow-sm overflow-hidden">
+    <div className="w-full rounded-2xl border bg-card p-6 overflow-hidden">
       <div className="mb-8 flex flex-col sm:flex-row items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h3 className="text-xl font-bold text-foreground">

@@ -40,7 +40,7 @@ export default function DashboardPage() {
   const [selectedYear, setSelectedYear] = React.useState("2026");
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
@@ -50,7 +50,7 @@ export default function DashboardPage() {
             أهلاً بكِ مجدداً في بيت السعادة، إليكِ آخر إحصائيات متجرك اليوم.
           </p>
         </div>
-        <div className="w-full sm:w-auto flex items-center gap-2 bg-background border rounded-2xl p-2 self-start">
+        <div className="w-full sm:w-auto flex items-center gap-2 bg-white border rounded-2xl p-2 self-start">
           <div className="p-2 bg-primary/10 rounded-xl text-primary">
             <CalendarIcon className="size-4" />
           </div>
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <StatsCards month={selectedMonth} year={selectedYear} />
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 min-w-0">
           <RevenueChart month={selectedMonth} year={selectedYear} />
         </div>
