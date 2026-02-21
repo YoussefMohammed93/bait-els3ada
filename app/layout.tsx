@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Tajawal } from "next/font/google";
 import SmoothScrollProvider from "@/components/smooth-scroll";
+import { ConvexClientProvider } from "./convex-client-provider";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -40,7 +41,9 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body className={`${tajawal.variable} antialiased`}>
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <SmoothScrollProvider>
+          <ConvexClientProvider>{children}</ConvexClientProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );

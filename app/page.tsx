@@ -1,36 +1,16 @@
-import dynamic from "next/dynamic";
-import HeroSection from "@/components/landing/landing-hero";
-import SiteFooter from "@/components/landing/landing-footer";
-import SiteHeader from "@/components/landing/landing-header";
-import AboutSection from "@/components/landing/landing-about";
-import ContactSection from "@/components/landing/landing-contact";
-import ServicesSection from "@/components/landing/landing-services";
+"use client";
 
-const LocationSection = dynamic(
-  () => import("@/components/landing/landing-location"),
-  {
-    loading: () => (
-      <div className="py-20 gradient-section border-b">
-        <div className="w-full max-w-[1360px] mx-auto px-4 sm:px-5">
-          <div className="max-w-4xl mx-auto h-[400px] rounded-2xl bg-muted animate-pulse" />
-        </div>
-      </div>
-    ),
-  },
-);
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
 
-export default function LandingPage() {
+export default function Home() {
+  const tasks = useQuery(api.tasks.get);
+
   return (
-    <>
-      <SiteHeader />
-      <main>
-        <HeroSection />
-        <AboutSection />
-        <ServicesSection />
-        <LocationSection />
-        <ContactSection />
-      </main>
-      <SiteFooter />
-    </>
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      {tasks?.map(({ _id, text }) => (
+        <div key={_id}>{text}</div>
+      ))}
+    </main>
   );
 }
