@@ -12,16 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, RotateCcw } from "lucide-react";
 
-const categories = [
-  { value: "all", label: "جميع التصنيفات" },
-  { value: "مكياج", label: "مكياج" },
-  { value: "عناية بالبشرة", label: "عناية بالبشرة" },
-  { value: "عطور", label: "عطور" },
-  { value: "إكسسوارات", label: "إكسسوارات" },
-  { value: "هدايا", label: "هدايا" },
-  { value: "شنط", label: "شنط" },
-];
-
 const stockStatuses = [
   { value: "all", label: "جميع الحالات" },
   { value: "متوفر", label: "متوفر" },
@@ -47,6 +37,7 @@ interface ProductsFiltersProps {
   sortBy: string;
   onSortByChange: (value: string) => void;
   onReset: () => void;
+  categories?: { value: string; label: string }[];
 }
 
 export function ProductsFilters({
@@ -59,7 +50,12 @@ export function ProductsFilters({
   sortBy,
   onSortByChange,
   onReset,
+  categories: customCategories,
 }: ProductsFiltersProps) {
+  const categoriesList = [
+    { value: "all", label: "جميع التصنيفات" },
+    ...(customCategories || []),
+  ];
   const hasFilters =
     search !== "" ||
     category !== "all" ||
@@ -86,7 +82,7 @@ export function ProductsFilters({
             <SelectValue placeholder="التصنيف" />
           </SelectTrigger>
           <SelectContent>
-            {categories.map((c) => (
+            {categoriesList.map((c: { value: string; label: string }) => (
               <SelectItem key={c.value} value={c.value} className="font-bold">
                 {c.label}
               </SelectItem>

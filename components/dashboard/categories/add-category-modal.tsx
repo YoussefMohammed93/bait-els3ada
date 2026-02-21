@@ -22,6 +22,7 @@ interface AddCategoryModalProps {
   onOpenChange: (open: boolean) => void;
   onSave: (data: CategoryFormData) => void;
   editData?: CategoryFormData | null;
+  isLoading?: boolean;
 }
 
 export function AddCategoryModal({
@@ -29,6 +30,7 @@ export function AddCategoryModal({
   onOpenChange,
   onSave,
   editData,
+  isLoading,
 }: AddCategoryModalProps) {
   const [name, setName] = React.useState("");
   const [image, setImage] = React.useState("");
@@ -148,14 +150,19 @@ export function AddCategoryModal({
           <div className="flex gap-3 pt-2">
             <Button
               type="submit"
-              disabled={!name.trim()}
+              disabled={!name.trim() || isLoading}
               className="flex-1 rounded-xl h-11 font-bold"
             >
-              {editData ? "حفظ التعديلات" : "إضافة الفئة"}
+              {isLoading
+                ? "جاري الحفظ..."
+                : editData
+                  ? "حفظ التعديلات"
+                  : "إضافة الفئة"}
             </Button>
             <Button
               type="button"
               variant="outline"
+              disabled={isLoading}
               onClick={() => onOpenChange(false)}
               className="rounded-xl h-11 font-bold"
             >

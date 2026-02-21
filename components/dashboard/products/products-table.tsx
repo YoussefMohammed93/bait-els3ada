@@ -164,7 +164,7 @@ export function ProductsTable({
                     </td>
 
                     {/* Date */}
-                    <td className="px-5 py-3 text-muted-foreground font-medium text-xs whitespace-nowrap">
+                    <td className="px-5 py-3 text-muted-foreground font-medium text-sm whitespace-nowrap">
                       {product.dateAdded}
                     </td>
 

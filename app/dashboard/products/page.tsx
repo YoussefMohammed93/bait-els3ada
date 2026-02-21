@@ -8,7 +8,11 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import * as React from "react";
+import { toast } from "sonner";
+import { Loader } from "lucide-react";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { Id } from "@/convex/_generated/dataModel";
 import {
   ProductsTable,
   type Product,
@@ -17,143 +21,54 @@ import {
   AddProductModal,
   type ProductFormData,
 } from "@/components/dashboard/products/add-product-modal";
+import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { ProductsFilters } from "@/components/dashboard/products/products-filters";
 import { DeleteConfirmModal } from "@/components/dashboard/products/delete-confirm-modal";
 import { ProductsEmptyState } from "@/components/dashboard/products/products-empty-state";
 
-// ── Mock Data (inline — will be replaced with API calls) ──
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "مجموعة مكياج سهرة فاخرة",
-    description:
-      "مجموعة مكياج كاملة للسهرات تضم أحمر شفاه، كريم أساس، وظلال عيون",
-    category: "مكياج",
-    price: 1200,
-    stock: 25,
-    status: "متوفر",
-    image: "/cosmetic-accessories.png",
-    images: ["/print.png", "/handcraft.png"],
-    dateAdded: "2026-02-15",
-  },
-  {
-    id: "2",
-    name: "كريم مرطب طبيعي",
-    description: "كريم مرطب بالمكونات الطبيعية للعناية اليومية بالبشرة",
-    category: "عناية بالبشرة",
-    price: 350,
-    stock: 4,
-    status: "كمية قليلة",
-    image: "/handcraft.png",
-    images: ["/cosmetic-accessories.png"],
-    dateAdded: "2026-02-12",
-  },
-  {
-    id: "3",
-    name: "عطر زهور الربيع",
-    description: "عطر نسائي فاخر برائحة الزهور الطبيعية المنعشة",
-    category: "عطور",
-    price: 890,
-    stock: 18,
-    status: "متوفر",
-    image: "/ring.png",
-    dateAdded: "2026-02-10",
-  },
-  {
-    id: "4",
-    name: "سلسلة فضية مع قلب",
-    description: "سلسلة فضية أنيقة بتصميم القلب مع حجر كريستال",
-    category: "إكسسوارات",
-    price: 450,
-    stock: 0,
-    status: "غير متوفر",
-    image: "/ring.png",
-    images: ["/giftbox.png", "/print.png"],
-    dateAdded: "2026-02-08",
-  },
-  {
-    id: "5",
-    name: "شنطة مكياج جلدية",
-    description: "شنطة مكياج من الجلد الطبيعي بتصميم عصري وعملي",
-    category: "شنط",
-    price: 680,
-    stock: 12,
-    status: "متوفر",
-    image: "/handcraft.png",
-    dateAdded: "2026-02-05",
-  },
-  {
-    id: "6",
-    name: "بوكس هدية عيد الحب",
-    description: "بوكس هدية يحتوي على شموع عطرية وشوكولاتة فاخرة",
-    category: "هدايا",
-    price: 550,
-    stock: 3,
-    status: "كمية قليلة",
-    image: "/giftbox.png",
-    images: ["/cosmetic-accessories.png", "/ring.png", "/handcraft.png"],
-    dateAdded: "2026-02-03",
-  },
-  {
-    id: "7",
-    name: "سيروم فيتامين سي",
-    description: "سيروم فيتامين سي المركز لنضارة البشرة وتوحيد اللون",
-    category: "عناية بالبشرة",
-    price: 420,
-    stock: 30,
-    status: "متوفر",
-    image: "/cosmetic-accessories.png",
-    dateAdded: "2026-02-01",
-  },
-  {
-    id: "8",
-    name: "أحمر شفاه مطفي",
-    description: "أحمر شفاه مطفي طويل الثبات بألوان متعددة",
-    category: "مكياج",
-    price: 180,
-    stock: 50,
-    status: "متوفر",
-    image: "/print.png",
-    dateAdded: "2026-01-28",
-  },
-  {
-    id: "9",
-    name: "أسوارة ذهبية مرصعة",
-    description: "أسوارة ذهبية مرصعة بالزركون مع قفل مغناطيسي",
-    category: "إكسسوارات",
-    price: 750,
-    stock: 0,
-    status: "غير متوفر",
-    image: "/ring.png",
-    dateAdded: "2026-01-25",
-  },
-  {
-    id: "10",
-    name: "شنطة كروس صغيرة",
-    description: "شنطة كروس أنيقة للخروجات اليومية بتصميم بسيط وعملي",
-    category: "شنط",
-    price: 320,
-    stock: 8,
-    status: "متوفر",
-    image: "/handcraft.png",
-    dateAdded: "2026-01-20",
-  },
-];
-
 const ITEMS_PER_PAGE = 6;
 
 export default function ProductsPage() {
-  // Products data
-  const [products, setProducts] = React.useState<Product[]>(mockProducts);
-
   // Filters
   const [search, setSearch] = React.useState("");
   const [category, setCategory] = React.useState("all");
   const [stockStatus, setStockStatus] = React.useState("all");
   const [sortBy, setSortBy] = React.useState("newest");
-
-  // Pagination
   const [currentPage, setCurrentPage] = React.useState(1);
+
+  // Pagination & Data Fetching
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.products.list,
+    {
+      search: search || undefined,
+      category: category || undefined,
+      status: stockStatus || undefined,
+      sortBy: sortBy || undefined,
+    },
+    { initialNumItems: ITEMS_PER_PAGE * currentPage },
+  );
+
+  const products = (results || []).map((p) => {
+    const { _id, ...rest } = p;
+    return {
+      ...rest,
+      id: _id,
+    };
+  }) as Product[];
+
+  const isLoading = status === "LoadingFirstPage";
+  const isLoadingMore = status === "LoadingMore";
+
+  // Categories for Filter
+  const categoriesListing = (useQuery(api.categories.list) || []).map((c) => ({
+    value: c.name,
+    label: c.name,
+  }));
+
+  // Mutations
+  const createProduct = useMutation(api.products.create);
+  const updateProduct = useMutation(api.products.update);
+  const removeProduct = useMutation(api.products.remove);
 
   // Modals
   const [addModalOpen, setAddModalOpen] = React.useState(false);
@@ -162,124 +77,95 @@ export default function ProductsPage() {
     null,
   );
 
+  const [isActionLoading, setIsActionLoading] = React.useState(false);
+
   // Reset pagination on filter change
   React.useEffect(() => {
     setCurrentPage(1);
   }, [search, category, stockStatus, sortBy]);
 
-  // ── Filter & Sort ──
-  const filteredProducts = React.useMemo(() => {
-    let result = [...products];
-
-    // Search
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q),
-      );
-    }
-
-    // Category filter
-    if (category !== "all") {
-      result = result.filter((p) => p.category === category);
-    }
-
-    // Stock status filter
-    if (stockStatus !== "all") {
-      result = result.filter((p) => p.status === stockStatus);
-    }
-
-    // Sort
-    switch (sortBy) {
-      case "newest":
-        result.sort(
-          (a, b) =>
-            new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime(),
-        );
-        break;
-      case "oldest":
-        result.sort(
-          (a, b) =>
-            new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime(),
-        );
-        break;
-      case "price-high":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "price-low":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "name":
-        result.sort((a, b) => a.name.localeCompare(b.name, "ar"));
-        break;
-    }
-
-    return result;
-  }, [products, search, category, stockStatus, sortBy]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = filteredProducts.slice(
+  // Pagination calculation
+  // Since Convex's usePaginatedQuery is more about "load more", but the UI has page numbers,
+  // we'll simulate page numbers based on the ITEMS_PER_PAGE.
+  // Note: For a true "server-side skip" pagination, Convex needs a different approach or manual offset management.
+  // For now, we'll use ITEMS_PER_PAGE to slice.
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE) || 1;
+  const paginatedProducts = products.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
   );
 
   // ── Handlers ──
-  const handleAddProduct = (data: ProductFormData) => {
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      name: data.name,
-      description: data.description,
-      category: data.category,
-      price: parseFloat(data.price) || 0,
-      stock: parseInt(data.stock) || 0,
-      status:
-        parseInt(data.stock) === 0
-          ? "غير متوفر"
-          : parseInt(data.stock) <= 5
-            ? "كمية قليلة"
-            : "متوفر",
-      image: data.image || "/placeholder-product.jpg",
-      images: data.images?.length ? data.images : undefined,
-      dateAdded: new Date().toISOString().split("T")[0],
-    };
-    setProducts((prev) => [newProduct, ...prev]);
+  const handleAddProduct = async (data: ProductFormData) => {
+    setIsActionLoading(true);
+    try {
+      await createProduct({
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        price: parseFloat(data.price) || 0,
+        stock: parseInt(data.stock) || 0,
+        status:
+          parseInt(data.stock) === 0
+            ? "غير متوفر"
+            : parseInt(data.stock) <= 5
+              ? "كمية قليلة"
+              : "متوفر",
+        image: data.image || "/placeholder-product.jpg",
+        images: data.images?.length ? data.images : undefined,
+        dateAdded: new Date().toISOString().split("T")[0],
+      });
+      toast.success("تم إضافة المنتج بنجاح");
+      setAddModalOpen(false);
+    } catch {
+      toast.error("حدث خطأ أثناء إضافة المنتج");
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
-  const handleEditProduct = (data: ProductFormData) => {
+  const handleEditProduct = async (data: ProductFormData) => {
     if (!editProduct) return;
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === editProduct.id
-          ? {
-              ...p,
-              name: data.name,
-              description: data.description,
-              category: data.category,
-              price: parseFloat(data.price) || 0,
-              stock: parseInt(data.stock) || 0,
-              status:
-                parseInt(data.stock) === 0
-                  ? "غير متوفر"
-                  : parseInt(data.stock) <= 5
-                    ? "كمية قليلة"
-                    : "متوفر",
-              image: data.image || p.image,
-              images: data.images?.length ? data.images : p.images,
-            }
-          : p,
-      ),
-    );
-    setEditProduct(null);
+    setIsActionLoading(true);
+    try {
+      await updateProduct({
+        id: editProduct.id as Id<"products">,
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        price: parseFloat(data.price) || 0,
+        stock: parseInt(data.stock) || 0,
+        status:
+          parseInt(data.stock) === 0
+            ? "غير متوفر"
+            : parseInt(data.stock) <= 5
+              ? "كمية قليلة"
+              : "متوفر",
+        image: data.image || editProduct.image,
+        images: data.images?.length ? data.images : editProduct.images,
+        dateAdded: editProduct.dateAdded,
+      });
+      toast.success("تم تحديث المنتج بنجاح");
+      setEditProduct(null);
+    } catch {
+      toast.error("حدث خطأ أثناء تحديث المنتج");
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
-  const handleDeleteProduct = () => {
+  const handleDeleteProduct = async () => {
     if (!deleteProduct) return;
-    setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-    setDeleteProduct(null);
+    setIsActionLoading(true);
+    try {
+      await removeProduct({ id: deleteProduct.id as Id<"products"> });
+      toast.success("تم حذف المنتج بنجاح");
+      setDeleteProduct(null);
+    } catch {
+      toast.error("حدث خطأ أثناء حذف المنتج");
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
   const handleResetFilters = () => {
@@ -287,6 +173,13 @@ export default function ProductsPage() {
     setCategory("all");
     setStockStatus("all");
     setSortBy("newest");
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page > currentPage && status === "CanLoadMore") {
+      loadMore(ITEMS_PER_PAGE);
+    }
+    setCurrentPage(page);
   };
 
   return (
@@ -411,29 +304,40 @@ export default function ProductsPage() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
         onReset={handleResetFilters}
+        categories={categoriesListing}
       />
 
       {/* Results count */}
-      <p className="text-sm text-muted-foreground font-medium">
-        عرض{" "}
-        <span className="text-foreground font-bold">
-          {filteredProducts.length}
-        </span>{" "}
-        منتج
-        {search || category !== "all" || stockStatus !== "all"
-          ? " ( النتائج المطابقة لخيارات التصفية )"
-          : ""}
+      <p className="text-sm text-muted-foreground font-medium flex items-center justify-between">
+        <span>
+          عرض{" "}
+          <span className="text-foreground font-bold">{products.length}</span>{" "}
+          منتج
+          {search || category !== "all" || stockStatus !== "all"
+            ? " ( النتائج المطابقة لخيارات التصفية )"
+            : ""}
+        </span>
+        {(isLoading || isLoadingMore) && (
+          <Loader className="size-4 animate-spin text-primary" />
+        )}
       </p>
 
       {/* Table or Empty State */}
-      {filteredProducts.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-card rounded-2xl border border-dashed">
+          <Loader className="size-8 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground font-medium">
+            جاري تحميل المنتجات...
+          </p>
+        </div>
+      ) : products.length === 0 ? (
         <ProductsEmptyState onAddProduct={() => setAddModalOpen(true)} />
       ) : (
         <ProductsTable
           products={paginatedProducts}
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
           onEdit={(product) => setEditProduct(product)}
           onDelete={(product) => setDeleteProduct(product)}
         />
@@ -444,12 +348,16 @@ export default function ProductsPage() {
         open={addModalOpen}
         onOpenChange={setAddModalOpen}
         onSave={handleAddProduct}
+        isLoading={isActionLoading}
+        categories={categoriesListing}
       />
 
       {/* Edit Product Modal */}
       <AddProductModal
         open={!!editProduct}
         onOpenChange={(open) => !open && setEditProduct(null)}
+        isLoading={isActionLoading}
+        categories={categoriesListing}
         editData={
           editProduct
             ? {
@@ -472,6 +380,7 @@ export default function ProductsPage() {
         onOpenChange={(open) => !open && setDeleteProduct(null)}
         productName={deleteProduct?.name || ""}
         onConfirm={handleDeleteProduct}
+        isLoading={isActionLoading}
       />
     </div>
   );

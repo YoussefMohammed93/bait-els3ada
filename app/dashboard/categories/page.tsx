@@ -2,9 +2,14 @@
 
 import Image from "next/image";
 import * as React from "react";
+import { toast } from "sonner";
+import { Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Search, RotateCcw } from "lucide-react";
+import { Id } from "@/convex/_generated/dataModel";
+import { useQuery, useMutation } from "convex/react";
 import {
   AddCategoryModal,
   type CategoryFormData,
@@ -21,72 +26,27 @@ export interface Category {
   dateAdded: string;
 }
 
-// ── Mock Data ──
-const mockCategories: Category[] = [
-  {
-    id: "1",
-    name: "ساعات",
-    image: "/ring.png",
-    productsCount: 12,
-    dateAdded: "2025-08-15",
-  },
-  {
-    id: "2",
-    name: "هدايا",
-    image: "/giftbox.png",
-    productsCount: 8,
-    dateAdded: "2025-09-02",
-  },
-  {
-    id: "3",
-    name: "مكياج",
-    image: "/cosmetic-accessories.png",
-    productsCount: 15,
-    dateAdded: "2025-09-20",
-  },
-  {
-    id: "4",
-    name: "إكسسوارات",
-    image: "/ring.png",
-    productsCount: 20,
-    dateAdded: "2025-10-05",
-  },
-  {
-    id: "5",
-    name: "عناية بالبشرة",
-    image: "/handcraft.png",
-    productsCount: 10,
-    dateAdded: "2025-10-18",
-  },
-  {
-    id: "6",
-    name: "عطور",
-    image: "/print.png",
-    productsCount: 7,
-    dateAdded: "2025-11-01",
-  },
-  {
-    id: "7",
-    name: "شنط",
-    image: "/handcraft.png",
-    productsCount: 6,
-    dateAdded: "2025-11-15",
-  },
-  {
-    id: "8",
-    name: "شموع عطرية",
-    image: "/giftbox.png",
-    productsCount: 4,
-    dateAdded: "2025-12-01",
-  },
-];
-
 export default function CategoriesPage() {
-  const [categories, setCategories] =
-    React.useState<Category[]>(mockCategories);
+  const categoriesListing = useQuery(api.categories.list);
+
+  const categories = React.useMemo(() => {
+    if (!categoriesListing) return [];
+    return categoriesListing.map((c) => ({
+      id: c._id,
+      name: c.name,
+      image: c.image || "/giftbox.png",
+      productsCount: c.productsCount || 0,
+      dateAdded: new Date(c._creationTime).toISOString().split("T")[0],
+    }));
+  }, [categoriesListing]);
 
   // Search
   const [search, setSearch] = React.useState("");
+
+  // Mutations
+  const createCategory = useMutation(api.categories.create);
+  const updateCategory = useMutation(api.categories.update);
+  const removeCategory = useMutation(api.categories.remove);
 
   // Modals
   const [addModalOpen, setAddModalOpen] = React.useState(false);
@@ -94,6 +54,8 @@ export default function CategoriesPage() {
   const [deleteCategory, setDeleteCategory] = React.useState<Category | null>(
     null,
   );
+
+  const [isLoading, setIsLoading] = React.useState(false);
 
   // ── Filter ──
   const filteredCategories = React.useMemo(() => {
@@ -103,33 +65,52 @@ export default function CategoriesPage() {
   }, [categories, search]);
 
   // ── Handlers ──
-  const handleAddCategory = (data: CategoryFormData) => {
-    const newCategory: Category = {
-      id: Date.now().toString(),
-      name: data.name,
-      image: data.image || "/giftbox.png",
-      productsCount: 0,
-      dateAdded: new Date().toISOString().split("T")[0],
-    };
-    setCategories((prev) => [newCategory, ...prev]);
+  const handleAddCategory = async (data: CategoryFormData) => {
+    setIsLoading(true);
+    try {
+      await createCategory({
+        name: data.name,
+        image: data.image || undefined,
+      });
+      toast.success("تم إضافة الفئة بنجاح");
+      setAddModalOpen(false);
+    } catch {
+      toast.error("حدث خطأ أثناء إضافة الفئة");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEditCategory = (data: CategoryFormData) => {
+  const handleEditCategory = async (data: CategoryFormData) => {
     if (!editCategory) return;
-    setCategories((prev) =>
-      prev.map((c) =>
-        c.id === editCategory.id
-          ? { ...c, name: data.name, image: data.image || c.image }
-          : c,
-      ),
-    );
-    setEditCategory(null);
+    setIsLoading(true);
+    try {
+      await updateCategory({
+        id: editCategory.id as Id<"categories">,
+        name: data.name,
+        image: data.image || undefined,
+      });
+      toast.success("تم تحديث الفئة بنجاح");
+      setEditCategory(null);
+    } catch {
+      toast.error("حدث خطأ أثناء تحديث الفئة");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteCategory = () => {
+  const handleDeleteCategory = async () => {
     if (!deleteCategory) return;
-    setCategories((prev) => prev.filter((c) => c.id !== deleteCategory.id));
-    setDeleteCategory(null);
+    setIsLoading(true);
+    try {
+      await removeCategory({ id: deleteCategory.id as Id<"categories"> });
+      toast.success("تم حذف الفئة بنجاح");
+      setDeleteCategory(null);
+    } catch {
+      toast.error("حدث خطأ أثناء حذف الفئة");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -252,16 +233,28 @@ export default function CategoriesPage() {
       </div>
 
       {/* Results count */}
-      <p className="text-sm text-muted-foreground font-medium px-1">
-        عرض{" "}
-        <span className="font-bold text-foreground">
-          {filteredCategories.length}
-        </span>{" "}
-        فئة
-      </p>
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm text-muted-foreground font-medium">
+          عرض{" "}
+          <span className="font-bold text-foreground">
+            {filteredCategories.length}
+          </span>{" "}
+          فئة
+        </p>
+        {categoriesListing === undefined && (
+          <Loader className="size-4 animate-spin text-primary" />
+        )}
+      </div>
 
       {/* Categories Grid or Empty State */}
-      {filteredCategories.length === 0 ? (
+      {categoriesListing === undefined ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-card rounded-2xl border border-dashed">
+          <Loader className="size-8 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground font-medium">
+            جاري تحميل الفئات...
+          </p>
+        </div>
+      ) : filteredCategories.length === 0 ? (
         <CategoriesEmptyState onAddCategory={() => setAddModalOpen(true)} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -345,12 +338,14 @@ export default function CategoriesPage() {
         open={addModalOpen}
         onOpenChange={setAddModalOpen}
         onSave={handleAddCategory}
+        isLoading={isLoading}
       />
 
       {/* Edit Category Modal */}
       <AddCategoryModal
         open={!!editCategory}
         onOpenChange={(open) => !open && setEditCategory(null)}
+        isLoading={isLoading}
         editData={
           editCategory
             ? { name: editCategory.name, image: editCategory.image }
@@ -365,6 +360,7 @@ export default function CategoriesPage() {
         onOpenChange={(open) => !open && setDeleteCategory(null)}
         categoryName={deleteCategory?.name || ""}
         onConfirm={handleDeleteCategory}
+        isLoading={isLoading}
       />
     </div>
   );

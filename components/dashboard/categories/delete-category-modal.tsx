@@ -17,6 +17,7 @@ interface DeleteCategoryModalProps {
   onOpenChange: (open: boolean) => void;
   categoryName: string;
   onConfirm: () => void;
+  isLoading?: boolean;
 }
 
 export function DeleteCategoryModal({
@@ -24,6 +25,7 @@ export function DeleteCategoryModal({
   onOpenChange,
   categoryName,
   onConfirm,
+  isLoading,
 }: DeleteCategoryModalProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -54,11 +56,15 @@ export function DeleteCategoryModal({
           <AlertDialogFooter className="flex gap-3 sm:gap-3">
             <AlertDialogAction
               onClick={onConfirm}
+              disabled={isLoading}
               className="flex-1 rounded-xl h-10 font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              نعم
+              {isLoading ? "جاري الحذف..." : "نعم"}
             </AlertDialogAction>
-            <AlertDialogCancel className="flex-1 rounded-xl h-10 font-bold mt-0">
+            <AlertDialogCancel
+              disabled={isLoading}
+              className="flex-1 rounded-xl h-10 font-bold mt-0"
+            >
               إلغاء
             </AlertDialogCancel>
           </AlertDialogFooter>

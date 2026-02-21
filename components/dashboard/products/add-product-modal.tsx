@@ -22,15 +22,6 @@ import {
 } from "@/components/ui/select";
 import { Upload, X, ImagePlus, Plus } from "lucide-react";
 
-const categories = [
-  { value: "مكياج", label: "مكياج" },
-  { value: "عناية بالبشرة", label: "عناية بالبشرة" },
-  { value: "عطور", label: "عطور" },
-  { value: "إكسسوارات", label: "إكسسوارات" },
-  { value: "هدايا", label: "هدايا" },
-  { value: "شنط", label: "شنط" },
-];
-
 const MAX_GALLERY_IMAGES = 5;
 
 export interface ProductFormData {
@@ -48,6 +39,8 @@ interface AddProductModalProps {
   onOpenChange: (open: boolean) => void;
   editData?: ProductFormData | null;
   onSave: (data: ProductFormData) => void;
+  isLoading?: boolean;
+  categories?: { value: string; label: string }[];
 }
 
 export function AddProductModal({
@@ -55,7 +48,10 @@ export function AddProductModal({
   onOpenChange,
   editData,
   onSave,
+  isLoading,
+  categories: customCategories,
 }: AddProductModalProps) {
+  const categoriesList = customCategories || [];
   const isEdit = !!editData;
 
   const [form, setForm] = React.useState<ProductFormData>({
@@ -269,7 +265,7 @@ export function AddProductModal({
                 <SelectValue placeholder="اختر التصنيف" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((c) => (
+                {categoriesList.map((c: { value: string; label: string }) => (
                   <SelectItem
                     key={c.value}
                     value={c.value}
@@ -427,17 +423,25 @@ export function AddProductModal({
               )}
             </div>
           </div>
-
           {/* Buttons */}
           <DialogFooter className="gap-3 pt-2">
-            <Button type="submit" className="flex-1 rounded-xl font-bold h-11">
-              {isEdit ? "حفظ التعديلات" : "حفظ المنتج"}
+            <Button
+              type="submit"
+              className="flex-1 rounded-xl font-bold h-11"
+              disabled={isLoading}
+            >
+              {isLoading
+                ? "جاري الحفظ..."
+                : isEdit
+                  ? "حفظ التعديلات"
+                  : "حفظ المنتج"}
             </Button>
             <DialogClose asChild>
               <Button
                 type="button"
                 variant="outline"
                 className="flex-1 rounded-xl font-bold h-11"
+                disabled={isLoading}
               >
                 إلغاء
               </Button>

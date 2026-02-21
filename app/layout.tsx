@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 import { Tajawal } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 
 import SmoothScrollProvider from "@/components/smooth-scroll";
 
@@ -48,7 +49,10 @@ export default function RootLayout({
       <html lang="ar" dir="rtl">
         <body className={`${tajawal.variable} antialiased`}>
           <SmoothScrollProvider>
-            <ConvexClientProvider>{children}</ConvexClientProvider>
+            <ConvexClientProvider>
+              {children}
+              <Toaster />
+            </ConvexClientProvider>
           </SmoothScrollProvider>
         </body>
       </html>

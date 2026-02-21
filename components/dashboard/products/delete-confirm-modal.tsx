@@ -17,6 +17,7 @@ interface DeleteConfirmModalProps {
   onOpenChange: (open: boolean) => void;
   productName: string;
   onConfirm: () => void;
+  isLoading?: boolean;
 }
 
 export function DeleteConfirmModal({
@@ -24,6 +25,7 @@ export function DeleteConfirmModal({
   onOpenChange,
   productName,
   onConfirm,
+  isLoading,
 }: DeleteConfirmModalProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -42,11 +44,15 @@ export function DeleteConfirmModal({
         <AlertDialogFooter className="gap-3 mt-2">
           <AlertDialogAction
             onClick={onConfirm}
+            disabled={isLoading}
             className="flex-1 rounded-xl font-bold h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            حذف المنتج
+            {isLoading ? "جاري الحذف..." : "حذف المنتج"}
           </AlertDialogAction>
-          <AlertDialogCancel className="flex-1 rounded-xl font-bold h-11 mt-0">
+          <AlertDialogCancel
+            disabled={isLoading}
+            className="flex-1 rounded-xl font-bold h-11 mt-0"
+          >
             إلغاء
           </AlertDialogCancel>
         </AlertDialogFooter>
