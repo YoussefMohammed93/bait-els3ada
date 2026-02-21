@@ -12,7 +12,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -140,18 +139,6 @@ export function DashboardSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className={`p-4 ${isCollapsed ? "" : "border-t"}`}>
-        {!isCollapsed ? (
-          <div className="flex flex-col gap-2 p-2 bg-muted/40 rounded-xl border border-muted-foreground/10">
-            <p className="text-[13px] text-muted-foreground font-bold text-center">
-              أهلاً بكِ <strong className="text-primary">ريهام</strong> في بيت
-              السعادة ✨
-            </p>
-          </div>
-        ) : (
-          <div />
-        )}
-      </SidebarFooter>
     </Sidebar>
   );
 }

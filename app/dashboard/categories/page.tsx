@@ -255,7 +255,11 @@ export default function CategoriesPage() {
           </p>
         </div>
       ) : filteredCategories.length === 0 ? (
-        <CategoriesEmptyState onAddCategory={() => setAddModalOpen(true)} />
+        <CategoriesEmptyState
+          onAddCategory={() => setAddModalOpen(true)}
+          isFiltering={!!search.trim()}
+          onReset={() => setSearch("")}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredCategories.map((category) => (

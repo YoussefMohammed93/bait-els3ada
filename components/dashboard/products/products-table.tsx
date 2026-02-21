@@ -23,6 +23,7 @@ export interface Product {
   image: string;
   images?: string[];
   dateAdded: string;
+  isCodAvailable?: boolean;
 }
 
 interface ProductsTableProps {

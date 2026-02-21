@@ -23,8 +23,11 @@ export function AdminGuard({ children }: { children: ReactNode }) {
 
   if (isLoading || !user || user.userRole !== "admin") {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="flex flex-col gap-3 h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-xl font-medium text-muted-foreground">
+          جاري التحميل...
+        </p>
       </div>
     );
   }

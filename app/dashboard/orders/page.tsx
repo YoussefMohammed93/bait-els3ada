@@ -539,7 +539,10 @@ export default function OrdersPage() {
           onViewDetails={setSelectedOrder}
         />
       ) : (
-        <OrdersEmptyState />
+        <OrdersEmptyState
+          isFiltering={!!search.trim() || status !== "all"}
+          onReset={handleResetFilters}
+        />
       )}
 
       {/* Order Details Modal */}

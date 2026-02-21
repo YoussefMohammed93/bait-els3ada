@@ -29,6 +29,7 @@ const schema = defineSchema({
     images: v.optional(v.array(v.string())),
     status: v.string(),
     dateAdded: v.string(),
+    isCodAvailable: v.optional(v.boolean()),
   })
     .index("by_category", ["category"])
     .index("by_status", ["status"]),

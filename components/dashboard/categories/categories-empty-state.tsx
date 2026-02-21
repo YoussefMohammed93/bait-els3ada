@@ -1,12 +1,17 @@
-"use client";
+import { Button } from "@/components/ui/button";
+import { LayoutGrid, RotateCcw, Plus } from "lucide-react";
 
-import { LayoutGrid } from "lucide-react";
+interface CategoriesEmptyStateProps {
+  onAddCategory: () => void;
+  isFiltering?: boolean;
+  onReset?: () => void;
+}
 
 export function CategoriesEmptyState({
   onAddCategory,
-}: {
-  onAddCategory: () => void;
-}) {
+  isFiltering,
+  onReset,
+}: CategoriesEmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
       <div className="relative mb-6">
@@ -15,17 +20,25 @@ export function CategoriesEmptyState({
         </div>
       </div>
       <h3 className="text-xl font-bold text-foreground mb-2">
-        لا توجد فئات حالياً
+        {isFiltering ? "لا توجد نتائج تطابق بحثك" : "لا توجد فئات حالياً"}
       </h3>
-      <p className="text-muted-foreground max-w-sm font-medium text-sm mb-4">
-        لم يتم العثور على أي فئات. أضيفي فئات جديدة لتنظيم المنتجات.
+      <p className="text-muted-foreground max-w-sm font-medium text-sm mb-6">
+        {isFiltering
+          ? "جرب استخدام كلمات بحث مختلفة أو قم بإعادة تعيين الفلاتر للعثور على ما تبحث عنه."
+          : "لم يتم العثور على أي فئات. أضيفي فئات جديدة لتنظيم المنتجات."}
       </p>
-      <button
-        onClick={onAddCategory}
-        className="text-sm font-bold text-primary hover:underline"
-      >
-        إضافة فئة جديدة ←
-      </button>
+
+      {isFiltering ? (
+        <Button onClick={onReset} className="rounded-xl gap-2 px-6 h-11">
+          <RotateCcw className="size-4" />
+          إعادة تعيين البحث
+        </Button>
+      ) : (
+        <Button onClick={onAddCategory} className="rounded-xl gap-2 px-6 h-11">
+          <Plus className="size-4" />
+          إضافة فئة جديدة
+        </Button>
+      )}
     </div>
   );
 }

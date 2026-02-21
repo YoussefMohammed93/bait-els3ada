@@ -11,22 +11,23 @@ export const list = query({
     sortBy: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query;
-    if (args.category && args.category !== "all") {
-      query = ctx.db
-        .query("products")
-        .withIndex("by_category", (q) => q.eq("category", args.category!));
-    } else {
-      query = ctx.db.query("products");
-    }
+    // Prepare the initial query
+    const baseQuery =
+      args.category && args.category !== "all"
+        ? ctx.db
+            .query("products")
+            .withIndex("by_category", (q) => q.eq("category", args.category!))
+        : ctx.db.query("products");
 
-    // Note: status filtering could also be indexed if needed, but for now we filter after collecting if not using category index
-    // However, Convex allows only one withIndex. If category is used, we must filter status in memory or vice-versa.
-    // For simplicity and small datasets, we'll collect and then filter for search/status if category index is already used.
+    // Apply global query-level ordering
+    const orderedQuery =
+      args.sortBy === "oldest"
+        ? baseQuery.order("asc")
+        : baseQuery.order("desc"); // Default to newest (descending)
 
-    const result = await query.paginate(args.paginationOpts);
+    const result = await orderedQuery.paginate(args.paginationOpts);
 
-    // Filter by status and search in memory for now (Convex search is better with searchIndex, but let's keep it simple first)
+    // Filter by status and search in memory
     if (args.status && args.status !== "all") {
       result.page = result.page.filter((p) => p.status === args.status);
     }
@@ -40,8 +41,9 @@ export const list = query({
       );
     }
 
-    // Sort
-    if (args.sortBy) {
+    // Sort remaining fields in memory (price, name)
+    // Note: time-based sorting is handled at the query level above
+    if (args.sortBy && !["newest", "oldest"].includes(args.sortBy)) {
       switch (args.sortBy) {
         case "price-high":
           result.page.sort((a, b) => b.price - a.price);
@@ -51,19 +53,6 @@ export const list = query({
           break;
         case "name":
           result.page.sort((a, b) => a.name.localeCompare(b.name, "ar"));
-          break;
-        case "oldest":
-          result.page.sort(
-            (a, b) =>
-              new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime(),
-          );
-          break;
-        case "newest":
-        default:
-          result.page.sort(
-            (a, b) =>
-              new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime(),
-          );
           break;
       }
     }
@@ -83,6 +72,7 @@ export const create = mutation({
     images: v.optional(v.array(v.string())),
     status: v.string(),
     dateAdded: v.string(),
+    isCodAvailable: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("products", args);
@@ -101,6 +91,7 @@ export const update = mutation({
     images: v.optional(v.array(v.string())),
     status: v.string(),
     dateAdded: v.string(),
+    isCodAvailable: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { id, ...data } = args;

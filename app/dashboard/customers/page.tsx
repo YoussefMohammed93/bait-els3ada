@@ -426,7 +426,10 @@ export default function CustomersPage() {
           onViewDetails={setSelectedCustomer}
         />
       ) : (
-        <CustomersEmptyState />
+        <CustomersEmptyState
+          isFiltering={!!search.trim() || status !== "all"}
+          onReset={handleResetFilters}
+        />
       )}
 
       {/* Customer Details Modal */}

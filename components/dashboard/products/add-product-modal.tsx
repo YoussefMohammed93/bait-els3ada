@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import * as React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Upload, X, ImagePlus, Plus } from "lucide-react";
 
 const MAX_GALLERY_IMAGES = 5;
@@ -32,6 +32,7 @@ export interface ProductFormData {
   stock: string;
   image: string;
   images: string[];
+  isCodAvailable: boolean;
 }
 
 interface AddProductModalProps {
@@ -62,6 +63,7 @@ export function AddProductModal({
     stock: "",
     image: "",
     images: [],
+    isCodAvailable: false,
   });
 
   const [errors, setErrors] = React.useState<Partial<Record<string, boolean>>>(
@@ -80,6 +82,7 @@ export function AddProductModal({
         stock: "",
         image: "",
         images: [],
+        isCodAvailable: false,
       });
     }
     setErrors({});
@@ -281,6 +284,42 @@ export function AddProductModal({
                 التصنيف مطلوب
               </p>
             )}
+          </div>
+
+          {/* الدفع عند الاستلام (COD) */}
+          <div className="flex items-center justify-between p-4 rounded-2xl border">
+            <div className="space-y-0.5">
+              <label
+                className="text-sm font-bold text-foreground cursor-pointer"
+                htmlFor="cod-toggle"
+              >
+                الدفع عند الاستلام
+              </label>
+              <p className="text-xs text-muted-foreground font-medium">
+                تفعيل خاصية الدفع عند الاستلام لهذا المنتج
+              </p>
+            </div>
+            <button
+              type="button"
+              id="cod-toggle"
+              onClick={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  isCodAvailable: !prev.isCodAvailable,
+                }))
+              }
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                form.isCodAvailable ? "bg-primary" : "bg-input"
+              }`}
+            >
+              <span
+                className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                  form.isCodAvailable
+                    ? "translate-x-5 rtl:-translate-x-5"
+                    : "translate-x-0.5 rtl:-translate-x-0.5"
+                }`}
+              />
+            </button>
           </div>
 
           {/* ═══════════════════════════════════════════════ */}

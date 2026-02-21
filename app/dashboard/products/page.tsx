@@ -114,6 +114,7 @@ export default function ProductsPage() {
         image: data.image || "/placeholder-product.jpg",
         images: data.images?.length ? data.images : undefined,
         dateAdded: new Date().toISOString().split("T")[0],
+        isCodAvailable: data.isCodAvailable,
       });
       toast.success("تم إضافة المنتج بنجاح");
       setAddModalOpen(false);
@@ -144,6 +145,7 @@ export default function ProductsPage() {
         image: data.image || editProduct.image,
         images: data.images?.length ? data.images : editProduct.images,
         dateAdded: editProduct.dateAdded,
+        isCodAvailable: data.isCodAvailable,
       });
       toast.success("تم تحديث المنتج بنجاح");
       setEditProduct(null);
@@ -331,7 +333,11 @@ export default function ProductsPage() {
           </p>
         </div>
       ) : products.length === 0 ? (
-        <ProductsEmptyState onAddProduct={() => setAddModalOpen(true)} />
+        <ProductsEmptyState
+          onAddProduct={() => setAddModalOpen(true)}
+          isFiltering={!!search || category !== "all" || stockStatus !== "all"}
+          onReset={handleResetFilters}
+        />
       ) : (
         <ProductsTable
           products={paginatedProducts}
@@ -368,6 +374,7 @@ export default function ProductsPage() {
                 stock: editProduct.stock.toString(),
                 image: editProduct.image,
                 images: editProduct.images ?? [],
+                isCodAvailable: editProduct.isCodAvailable ?? false,
               }
             : null
         }
