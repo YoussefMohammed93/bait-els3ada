@@ -1,8 +1,13 @@
 import "./globals.css";
+
 import type { Metadata } from "next";
+
 import { Tajawal } from "next/font/google";
+
 import SmoothScrollProvider from "@/components/smooth-scroll";
+
 import { ConvexClientProvider } from "./convex-client-provider";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -39,12 +44,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={`${tajawal.variable} antialiased`}>
-        <SmoothScrollProvider>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </SmoothScrollProvider>
-      </body>
-    </html>
+    <ConvexAuthNextjsServerProvider>
+      <html lang="ar" dir="rtl">
+        <body className={`${tajawal.variable} antialiased`}>
+          <SmoothScrollProvider>
+            <ConvexClientProvider>{children}</ConvexClientProvider>
+          </SmoothScrollProvider>
+        </body>
+      </html>
+    </ConvexAuthNextjsServerProvider>
   );
 }
