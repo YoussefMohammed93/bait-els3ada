@@ -49,10 +49,14 @@ export default function ProductsPage() {
   );
 
   const products = (results || []).map((p) => {
-    const { _id, ...rest } = p;
+    const { _id, _creationTime, ...rest } = p;
+    const pWithDate = p as { dateAdded?: string };
     return {
       ...rest,
       id: _id,
+      dateAdded:
+        pWithDate.dateAdded ||
+        new Date(_creationTime).toISOString().split("T")[0],
     };
   }) as Product[];
 

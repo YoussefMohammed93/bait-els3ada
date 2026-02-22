@@ -11,7 +11,7 @@ import { ConvexClientProvider } from "./convex-client-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 
 const tajawal = Tajawal({
-  subsets: ["arabic"],
+  subsets: ["arabic", "latin"],
   weight: ["400", "500", "700", "900"],
   display: "swap",
   variable: "--font-tajawal",

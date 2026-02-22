@@ -258,7 +258,7 @@ export function ProductsTable({
                   <span className="text-sm text-muted-foreground font-bold block uppercase tracking-wider">
                     التاريخ
                   </span>
-                  <span className="font-bold text-muted-foreground text-sm">
+                  <span className="font-bold text-foreground text-sm tabular-nums">
                     {product.dateAdded}
                   </span>
                 </div>

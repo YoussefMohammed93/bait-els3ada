@@ -29,15 +29,38 @@ const months = [
   { value: "12", label: "ديسمبر" },
 ];
 
-const years = [
-  { value: "2024", label: "2024" },
-  { value: "2025", label: "2025" },
-  { value: "2026", label: "2026" },
-];
+const years = [{ value: "2026", label: "2026" }];
 
 export default function DashboardPage() {
-  const [selectedMonth, setSelectedMonth] = React.useState("2"); // Default to February
-  const [selectedYear, setSelectedYear] = React.useState("2026");
+  const now = new Date();
+  const currentMonthNum = now.getMonth() + 1;
+  const currentYearNum = now.getFullYear();
+
+  const currentMonth = currentMonthNum.toString();
+  const currentYear = currentYearNum.toString();
+
+  const [selectedMonth, setSelectedMonth] = React.useState(currentMonth);
+  const [selectedYear, setSelectedYear] = React.useState(currentYear);
+
+  const isPast = React.useMemo(() => {
+    const selYear = parseInt(selectedYear);
+    const selMonth = parseInt(selectedMonth);
+    return (
+      selYear < currentYearNum ||
+      (selYear === currentYearNum && selMonth < currentMonthNum)
+    );
+  }, [selectedMonth, selectedYear, currentMonthNum, currentYearNum]);
+
+  const isFuture = React.useMemo(() => {
+    const selYear = parseInt(selectedYear);
+    const selMonth = parseInt(selectedMonth);
+    return (
+      selYear > currentYearNum ||
+      (selYear === currentYearNum && selMonth > currentMonthNum)
+    );
+  }, [selectedMonth, selectedYear, currentMonthNum, currentYearNum]);
+
+  const isCurrent = !isPast && !isFuture;
 
   return (
     <div className="space-y-5">
@@ -50,7 +73,7 @@ export default function DashboardPage() {
             أهلاً بكِ مجدداً في بيت السعادة، إليكِ آخر إحصائيات متجرك اليوم.
           </p>
         </div>
-        <div className="w-full sm:w-auto flex items-center gap-2 bg-white border rounded-2xl p-2 self-start">
+        <div className="w-full sm:w-auto flex items-center gap-2 bg-white border rounded-2xl p-2 self-start transition-all">
           <div className="p-2 bg-primary/10 rounded-xl text-primary">
             <CalendarIcon className="size-4" />
           </div>
@@ -91,17 +114,37 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      <StatsCards month={selectedMonth} year={selectedYear} />
+      <StatsCards
+        month={selectedMonth}
+        year={selectedYear}
+        isPast={isPast}
+        isCurrent={isCurrent}
+        isFuture={isFuture}
+      />
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 min-w-0">
-          <RevenueChart month={selectedMonth} year={selectedYear} />
+          <RevenueChart
+            month={selectedMonth}
+            year={selectedYear}
+            isPast={isPast}
+            isCurrent={isCurrent}
+            isFuture={isFuture}
+          />
         </div>
         <div className="lg:col-span-1 min-w-0">
-          <BestSellers />
+          <BestSellers
+            isPast={isPast}
+            isCurrent={isCurrent}
+            isFuture={isFuture}
+          />
         </div>
       </div>
       <div className="min-w-0">
-        <RecentOrders />
+        <RecentOrders
+          isPast={isPast}
+          isCurrent={isCurrent}
+          isFuture={isFuture}
+        />
       </div>
     </div>
   );
