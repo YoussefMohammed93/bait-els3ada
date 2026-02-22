@@ -11,7 +11,10 @@ const schema = defineSchema({
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
     userRole: v.optional(v.union(v.literal("user"), v.literal("admin"))),
-  }).index("email", ["email"]),
+    createdAt: v.optional(v.number()),
+  })
+    .index("email", ["email"])
+    .index("by_role", ["userRole"]),
 
   categories: defineTable({
     name: v.string(),

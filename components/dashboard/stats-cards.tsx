@@ -146,7 +146,7 @@ export function StatsCards({
                   </h3>
                   {trendValue !== "0%" && (
                     <div
-                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-bold ${trendColor}`}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold ${trendColor}`}
                     >
                       <TrendIcon className="size-3" />
                       <span>{trendValue}</span>
@@ -156,7 +156,7 @@ export function StatsCards({
                     trendType === "neutral" &&
                     stat.title !== "إجمالي المنتجات" && (
                       <div
-                        className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-bold ${trendColor}`}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold ${trendColor}`}
                       >
                         <TrendIcon className="size-3" />
                       </div>
