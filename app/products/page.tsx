@@ -16,10 +16,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useQuery } from "convex/react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { useQuery, usePaginatedQuery } from "convex/react";
 import ProductCard from "@/components/landing/product-card";
 import { useState, useCallback, useEffect, useRef } from "react";
 
@@ -33,7 +33,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "name", label: "الاسم" },
 ];
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 9;
 
 export default function ProductsPage() {
   // ─── State ──────────────────────────────────────────
@@ -47,25 +47,6 @@ export default function ProductsPage() {
   const [appliedMaxPrice, setAppliedMaxPrice] = useState<number | undefined>();
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [allProducts, setAllProducts] = useState<
-    {
-      _id: string;
-      name: string;
-      description: string;
-      price: number;
-      category: string;
-      image: string;
-      stock: number;
-      status: string;
-      dateAdded: string;
-      images?: string[];
-      isCodAvailable?: boolean;
-      _creationTime: number;
-    }[]
-  >([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [isDone, setIsDone] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const sortRef = useRef<HTMLDivElement>(null);
@@ -76,19 +57,6 @@ export default function ProductsPage() {
     const timer = setTimeout(() => setDebouncedSearch(searchInput), 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
-
-  // Reset pagination when filters change
-  useEffect(() => {
-    setAllProducts([]);
-    setCursor(null);
-    setIsDone(false);
-  }, [
-    debouncedSearch,
-    selectedCategory,
-    sortBy,
-    appliedMinPrice,
-    appliedMaxPrice,
-  ]);
 
   // Close sort dropdown on outside click
   useEffect(() => {
@@ -110,42 +78,26 @@ export default function ProductsPage() {
 
   // ─── Data ───────────────────────────────────────────
   const categories = useQuery(api.categories.list);
-
-  const productsResult = useQuery(api.productsPublic.listPublic, {
-    paginationOpts: { numItems: ITEMS_PER_PAGE, cursor: cursor },
-    search: debouncedSearch || undefined,
-    category: selectedCategory !== "all" ? selectedCategory : undefined,
-    sortBy,
-    minPrice: appliedMinPrice,
-    maxPrice: appliedMaxPrice,
-  });
-
-  // Accumulate pages
-  useEffect(() => {
-    if (productsResult) {
-      if (cursor === null) {
-        setAllProducts(productsResult.page);
-      } else {
-        setAllProducts((prev) => {
-          const existingIds = new Set(prev.map((p) => p._id));
-          const newProducts = productsResult.page.filter(
-            (p) => !existingIds.has(p._id),
-          );
-          return [...prev, ...newProducts];
-        });
-      }
-      setIsDone(productsResult.isDone);
-      setIsLoadingMore(false);
-    }
-  }, [productsResult, cursor]);
+  const {
+    results: allProducts,
+    status,
+    loadMore,
+  } = usePaginatedQuery(
+    api.productsPublic.listPublic,
+    {
+      search: debouncedSearch || undefined,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
+      sortBy,
+      minPrice: appliedMinPrice,
+      maxPrice: appliedMaxPrice,
+    },
+    { initialNumItems: ITEMS_PER_PAGE },
+  );
 
   // ─── Handlers ───────────────────────────────────────
   const handleLoadMore = useCallback(() => {
-    if (productsResult && !productsResult.isDone) {
-      setIsLoadingMore(true);
-      setCursor(productsResult.continueCursor);
-    }
-  }, [productsResult]);
+    loadMore(ITEMS_PER_PAGE);
+  }, [loadMore]);
 
   const handleApplyPrice = () => {
     setAppliedMinPrice(minPrice ? Number(minPrice) : undefined);
@@ -172,7 +124,9 @@ export default function ProductsPage() {
   };
 
   // ─── Derived ────────────────────────────────────────
-  const isInitialLoading = productsResult === undefined && cursor === null;
+  const isInitialLoading = status === "LoadingFirstPage";
+  const isLoadingMore = status === "LoadingMore";
+  const isDone = status === "Exhausted";
   const activeFiltersCount =
     (selectedCategory !== "all" ? 1 : 0) +
     (appliedMinPrice !== undefined ? 1 : 0) +
@@ -184,7 +138,7 @@ export default function ProductsPage() {
 
   // ─── Filter Sidebar JSX (rendered inline to avoid remount) ───
   const filterContentJSX = (onClose?: () => void) => (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Categories */}
       <div>
         <h3 className="text-sm font-bold text-foreground mb-3">التصنيفات</h3>
@@ -197,7 +151,7 @@ export default function ProductsPage() {
             className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
               selectedCategory === "all"
                 ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-primary/10"
+                : "bg-muted/60 text-secondary-foreground hover:bg-muted"
             }`}
           >
             الكل
@@ -212,7 +166,7 @@ export default function ProductsPage() {
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                 selectedCategory === cat.name
                   ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground hover:bg-primary/10"
+                  : "bg-muted/60 text-secondary-foreground hover:bg-muted"
               }`}
             >
               {cat.name}
@@ -309,7 +263,7 @@ export default function ProductsPage() {
             handleClearAll();
             onClose?.();
           }}
-          className="w-full rounded-xl h-10"
+          className="w-full rounded-xl h-10 bg-white hover:bg-muted/50"
         >
           <X className="size-4" />
           مسح جميع الفلاتر
@@ -557,7 +511,7 @@ export default function ProductsPage() {
                 {activeFiltersCount > 0 && (
                   <Button
                     onClick={handleClearAll}
-                    className="rounded-full px-6 h-11"
+                    className="rounded-full px-6 h-11 "
                   >
                     <X className="size-4" />
                     مسح جميع الفلاتر
@@ -590,7 +544,7 @@ export default function ProductsPage() {
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
                   variant="outline"
-                  className="rounded-full px-8 h-12 gap-2 border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                  className="rounded-full px-8 h-12 gap-2 bg-white hover:bg-muted/50"
                 >
                   {isLoadingMore ? (
                     <>
@@ -608,7 +562,7 @@ export default function ProductsPage() {
             {hasResults && isDone && allProducts.length > ITEMS_PER_PAGE && (
               <div className="text-center mt-10">
                 <p className="text-sm text-muted-foreground font-medium">
-                  ✨ لقد وصلت لنهاية المنتجات
+                  لقد وصلت لنهاية المنتجات...
                 </p>
               </div>
             )}

@@ -6,6 +6,7 @@ import {
   XCircle,
   CheckCircle2,
   AlertTriangle,
+  Database,
 } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
@@ -73,6 +74,7 @@ export default function ProductsPage() {
   const createProduct = useMutation(api.products.create);
   const updateProduct = useMutation(api.products.update);
   const removeProduct = useMutation(api.products.remove);
+  const seedProducts = useMutation(api.seed.seedProducts);
 
   // Modals
   const [addModalOpen, setAddModalOpen] = React.useState(false);
@@ -181,6 +183,18 @@ export default function ProductsPage() {
     setSortBy("newest");
   };
 
+  const handleSeedProducts = async () => {
+    setIsActionLoading(true);
+    try {
+      const result = await seedProducts();
+      toast.success(`تم إضافة ${result.count} منتج بنجاح`);
+    } catch {
+      toast.error("حدث خطأ أثناء إضافة المنتجات التجريبية");
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const handlePageChange = (page: number) => {
     if (page > currentPage && status === "CanLoadMore") {
       loadMore(ITEMS_PER_PAGE);
@@ -200,13 +214,28 @@ export default function ProductsPage() {
             يمكنك من هنا إضافة وتعديل وإدارة جميع المنتجات في متجرك.
           </p>
         </div>
-        <Button
-          onClick={() => setAddModalOpen(true)}
-          className="w-full sm:w-auto rounded-xl font-bold gap-2 px-6 h-11 self-start"
-        >
-          <Plus className="size-4" />
-          إضافة منتج جديد
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="outline"
+            onClick={handleSeedProducts}
+            disabled={isActionLoading}
+            className="rounded-xl font-bold gap-2 px-6 h-11 border-primary/20 hover:bg-primary/5 text-primary"
+          >
+            {isActionLoading ? (
+              <Loader className="size-4 animate-spin" />
+            ) : (
+              <Database className="size-4" />
+            )}
+            توليد منتجات تجريبية
+          </Button>
+          <Button
+            onClick={() => setAddModalOpen(true)}
+            className="w-full sm:w-auto rounded-xl font-bold gap-2 px-6 h-11 self-start"
+          >
+            <Plus className="size-4" />
+            إضافة منتج جديد
+          </Button>
+        </div>
       </div>
 
       {/* Stats Summary */}

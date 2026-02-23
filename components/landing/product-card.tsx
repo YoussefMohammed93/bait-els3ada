@@ -1,11 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { ArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
+import { useCart } from "@/hooks/use-cart";
+import { Button } from "@/components/ui/button";
+import { Id } from "@/convex/_generated/dataModel";
+import { useWishlist } from "@/hooks/use-wishlist";
+import { Heart, ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
   product: {
-    _id: string;
+    _id: Id<"products">;
     name: string;
     description: string;
     price: number;
@@ -15,6 +21,33 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { addItem, items } = useCart();
+  const { toggleItem, isInWishlist } = useWishlist();
+  const [isAdded, setIsAdded] = useState(false);
+
+  const isFavourite = isInWishlist(product._id);
+  const isAlreadyInCart = items.some((item) => item.productId === product._id);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product._id, 1);
+    setIsAdded(true);
+    toast.success("تم اضافة المنتج للسلة");
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const added = toggleItem(product._id);
+    if (added) {
+      toast.success("تم الإضافة للمفضلة");
+    } else {
+      toast.info("تم الإزالة من المفضلة");
+    }
+  };
+
   return (
     <Link
       href={`/products/${product._id}`}
@@ -35,6 +68,20 @@ const ProductCard = ({ product }: ProductCardProps) => {
             {product.category}
           </span>
         </div>
+
+        {/* Favorite Button */}
+        <button
+          onClick={handleToggleWishlist}
+          className={`absolute top-4 left-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all duration-300 ${
+            isFavourite
+              ? "bg-red-500 text-white border-red-500"
+              : "bg-white/90 text-muted-foreground border-primary/10 hover:bg-white hover:text-red-400"
+          }`}
+        >
+          <Heart
+            className={`size-4 transition-all ${isFavourite ? "fill-current scale-110" : ""}`}
+          />
+        </button>
       </div>
 
       {/* Content */}
@@ -61,10 +108,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </span>
           </div>
 
-          <div className="text-primary font-bold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-            تفاصيل المنتج
-            <ArrowRight className="size-4 mt-1" />
-          </div>
+          <Button
+            onClick={handleAddToCart}
+            disabled={isAdded || isAlreadyInCart}
+            size="sm"
+            className="rounded-full px-4 h-10 font-bold transition-all"
+          >
+            <ShoppingCart className="size-4" />
+            {isAdded || isAlreadyInCart ? "تم الإضافة" : "إضافة للسلة"}
+          </Button>
         </div>
       </div>
     </Link>

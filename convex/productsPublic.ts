@@ -12,7 +12,6 @@ export const listPublic = query({
     maxPrice: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    // Base query — filter by category index if provided
     const baseQuery =
       args.category && args.category !== "all"
         ? ctx.db
@@ -20,7 +19,6 @@ export const listPublic = query({
             .withIndex("by_category", (q) => q.eq("category", args.category!))
         : ctx.db.query("products");
 
-    // Apply ordering at query level
     const orderedQuery =
       args.sortBy === "oldest"
         ? baseQuery.order("asc")
@@ -28,10 +26,8 @@ export const listPublic = query({
 
     const result = await orderedQuery.paginate(args.paginationOpts);
 
-    // Filter out draft/hidden products if status exists
     result.page = result.page.filter((p) => !p.status || p.status !== "draft");
 
-    // Price range filter
     if (args.minPrice !== undefined) {
       result.page = result.page.filter((p) => p.price >= args.minPrice!);
     }
@@ -39,7 +35,6 @@ export const listPublic = query({
       result.page = result.page.filter((p) => p.price <= args.maxPrice!);
     }
 
-    // Search filter
     if (args.search) {
       const searchLower = args.search.toLowerCase();
       result.page = result.page.filter(
@@ -49,7 +44,6 @@ export const listPublic = query({
       );
     }
 
-    // In-memory sorting for price / name
     if (args.sortBy && !["newest", "oldest"].includes(args.sortBy)) {
       switch (args.sortBy) {
         case "price-high":
@@ -65,5 +59,32 @@ export const listPublic = query({
     }
 
     return result;
+  },
+});
+
+export const getById = query({
+  args: { id: v.id("products") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
+export const getRelated = query({
+  args: {
+    category: v.string(),
+    excludeId: v.id("products"),
+  },
+  handler: async (ctx, args) => {
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_category", (q) => q.eq("category", args.category))
+      .order("desc")
+      .take(5);
+
+    return products
+      .filter(
+        (p) => p._id !== args.excludeId && (!p.status || p.status !== "draft"),
+      )
+      .slice(0, 4);
   },
 });

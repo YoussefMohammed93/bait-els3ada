@@ -9,6 +9,7 @@ import {
   Settings,
   ChevronDown,
   LogIn,
+  ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -24,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import NextImage from "next/image";
+import { useCart } from "@/hooks/use-cart";
 import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ const SiteHeader = () => {
   const { signOut } = useAuthActions();
 
   const user = useQuery(api.users.currentUser);
+  const { totalItems } = useCart();
 
   const lenis = useLenis();
 
@@ -114,17 +117,13 @@ const SiteHeader = () => {
         }`}
       >
         <div className="w-full max-w-[1360px] mx-auto px-4 sm:px-5 flex items-center justify-between h-16">
-          <a
-            href="#"
+          <Link
+            href="/"
             className="flex items-center gap-2 text-xl font-bold text-foreground"
-            onClick={(e) => {
-              e.preventDefault();
-              lenis?.scrollTo(0);
-            }}
           >
             <Heart className="h-6 w-6 text-primary fill-primary" />
             بيت السعادة
-          </a>
+          </Link>
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8 font-medium text-muted-foreground">
             {navLinks.map((link) => (
@@ -137,7 +136,23 @@ const SiteHeader = () => {
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Cart Button */}
+            <Link href="/cart">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-10 w-10 rounded-full border bg-white hover:bg-primary/5 hover:text-primary transition-all group"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {mounted && totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white ring-2 ring-background animate-in zoom-in">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {!mounted || isLoading ? (
               <div className="flex items-center gap-2">
                 <Skeleton className="h-10 w-10 sm:w-32 rounded-full" />

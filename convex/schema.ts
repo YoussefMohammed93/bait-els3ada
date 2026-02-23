@@ -62,6 +62,20 @@ const schema = defineSchema({
     .index("by_status", ["status"])
     .index("by_customer", ["customerId"])
     .index("by_created_at", ["createdAt"]),
+
+  carts: defineTable({
+    userId: v.optional(v.id("users")),
+    sessionId: v.optional(v.string()), // For guest carts
+    items: v.array(
+      v.object({
+        productId: v.id("products"),
+        quantity: v.number(),
+      }),
+    ),
+    lastUpdated: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_session", ["sessionId"]),
 });
 
 export default schema;
