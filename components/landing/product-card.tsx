@@ -72,7 +72,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           onClick={handleToggleWishlist}
           className={`absolute top-4 left-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all duration-300 ${
             isFavourite
-              ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+              ? "bg-primary text-white border-primary"
               : "bg-white/90 text-muted-foreground border-primary/10 hover:bg-white hover:text-primary"
           }`}
         >

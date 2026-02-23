@@ -30,13 +30,13 @@ import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLenis } from "@/components/smooth-scroll";
+
 import { useConvexAuth, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { AuthDialog } from "@/components/auth/auth-form";
+import { SettingsDialog } from "@/components/auth/settings-dialog";
 import { MyOrdersDialog } from "@/components/orders/my-orders-dialog";
 import { FavoritesDialog } from "@/components/favorites/favorites-dialog";
-import { SettingsDialog } from "@/components/auth/settings-dialog";
 
 const SiteHeader = () => {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -44,8 +44,6 @@ const SiteHeader = () => {
 
   const user = useQuery(api.users.currentUser);
   const { totalItems } = useCart();
-
-  const lenis = useLenis();
 
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -64,53 +62,10 @@ const SiteHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!lenis) return;
-
-    const anchors = document.querySelectorAll('a[href^="#"]');
-
-    const handleClick = (e: Event) => {
-      e.preventDefault();
-      const anchor = e.currentTarget as HTMLAnchorElement;
-      const href = anchor.getAttribute("href");
-      if (href) {
-        const target = document.querySelector(href);
-        if (target) {
-          lenis.scrollTo(target as HTMLElement);
-        }
-      }
-    };
-
-    anchors.forEach((anchor) => {
-      anchor.addEventListener("click", handleClick);
-    });
-
-    return () => {
-      anchors.forEach((anchor) => {
-        anchor.removeEventListener("click", handleClick);
-      });
-    };
-  }, [lenis]);
-
-  const handleLinkClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string,
-  ) => {
-    e.preventDefault();
-    setIsOpen(false);
-    if (lenis) {
-      const target = document.querySelector(href);
-      if (target) {
-        lenis.scrollTo(target as HTMLElement);
-      }
-    }
-  };
-
   const navLinks = [
-    { name: "من نحن", href: "#about" },
-    { name: "خدماتنا", href: "#services" },
-    { name: "موقعنا", href: "#location" },
-    { name: "تواصل معنا", href: "#contact" },
+    { name: "المنتجات", href: "/products" },
+    { name: "التصنيفات", href: "/categories" },
+    { name: "موقعنا", href: "/location" },
   ];
 
   return (
@@ -133,13 +88,13 @@ const SiteHeader = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8 font-medium text-muted-foreground">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 className="nav-link hover:text-primary text-base transition-colors py-1"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </nav>
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -336,14 +291,14 @@ const SiteHeader = () => {
                 </SheetHeader>
                 <nav className="flex flex-col gap-1 mt-6">
                   {navLinks.map((link) => (
-                    <a
+                    <Link
                       key={link.name}
                       href={link.href}
                       className="text-lg font-medium text-foreground hover:text-primary hover:bg-accent/50 transition-colors rounded-xl px-4 py-3"
-                      onClick={(e) => handleLinkClick(e, link.href)}
+                      onClick={() => setIsOpen(false)}
                     >
                       {link.name}
-                    </a>
+                    </Link>
                   ))}
                   {!mounted || isLoading ? (
                     <Skeleton className="w-full mt-4 rounded-xl h-12 md:hidden" />

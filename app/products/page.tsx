@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { useQuery, usePaginatedQuery } from "convex/react";
 import ProductCard from "@/components/landing/product-card";
 import { useState, useCallback, useEffect, useRef } from "react";
@@ -36,10 +37,15 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 const ITEMS_PER_PAGE = 9;
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
+
   // ─── State ──────────────────────────────────────────
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(
+    categoryFromUrl || "all",
+  );
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");

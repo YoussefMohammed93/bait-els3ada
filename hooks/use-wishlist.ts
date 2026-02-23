@@ -50,7 +50,8 @@ export const useWishlist = () => {
     if (backendFavorites) {
       store.setItems(backendFavorites.map((p) => p._id));
     }
-  }, [backendFavorites, store]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backendFavorites]);
 
   // Sync guest favorites on login
   useEffect(() => {

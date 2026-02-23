@@ -9,6 +9,7 @@ import SmoothScrollProvider from "@/components/smooth-scroll";
 
 import { ConvexClientProvider } from "./convex-client-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import WhatsAppButton from "@/components/whatsapp-button";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
@@ -39,6 +40,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -50,8 +53,11 @@ export default function RootLayout({
         <body className={`${tajawal.variable} antialiased`}>
           <SmoothScrollProvider>
             <ConvexClientProvider>
-              {children}
-              <Toaster />
+              <TooltipProvider>
+                {children}
+                <WhatsAppButton />
+                <Toaster />
+              </TooltipProvider>
             </ConvexClientProvider>
           </SmoothScrollProvider>
         </body>
