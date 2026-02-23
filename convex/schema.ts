@@ -1,71 +1,43 @@
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 
-const schema = defineSchema({
-  ...authTables,
-
+export default defineSchema({
   users: defineTable({
     name: v.optional(v.string()),
-    image: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
-    userRole: v.optional(v.union(v.literal("user"), v.literal("admin"))),
+    image: v.optional(v.string()),
+    userRole: v.string(), // "user", "admin"
+    sessionId: v.optional(v.string()),
     createdAt: v.optional(v.number()),
   })
     .index("email", ["email"])
+    .index("phone", ["phone"])
+    .index("by_session", ["sessionId"])
     .index("by_role", ["userRole"]),
-
-  categories: defineTable({
-    name: v.string(),
-    image: v.optional(v.string()),
-    slug: v.string(),
-  }).index("slug", ["slug"]),
 
   products: defineTable({
     name: v.string(),
     description: v.string(),
+    category: v.string(),
     price: v.number(),
     stock: v.number(),
-    category: v.string(),
     image: v.string(),
     images: v.optional(v.array(v.string())),
     status: v.string(),
     dateAdded: v.string(),
     isCodAvailable: v.optional(v.boolean()),
-  })
-    .index("by_category", ["category"])
-    .index("by_status", ["status"]),
+  }).index("by_category", ["category"]),
 
-  orders: defineTable({
-    customerId: v.string(),
-    customerName: v.string(),
-    items: v.array(
-      v.object({
-        productId: v.id("products"),
-        productName: v.string(),
-        price: v.number(),
-        quantity: v.number(),
-      }),
-    ),
-    totalAmount: v.number(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("processing"),
-      v.literal("shipped"),
-      v.literal("completed"),
-      v.literal("cancelled"),
-    ),
-    paymentStatus: v.union(v.literal("paid"), v.literal("unpaid")),
-    createdAt: v.number(),
-  })
-    .index("by_status", ["status"])
-    .index("by_customer", ["customerId"])
-    .index("by_created_at", ["createdAt"]),
+  categories: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    image: v.optional(v.string()),
+  }),
 
   carts: defineTable({
     userId: v.optional(v.id("users")),
-    sessionId: v.optional(v.string()), // For guest carts
+    sessionId: v.optional(v.string()),
     items: v.array(
       v.object({
         productId: v.id("products"),
@@ -76,6 +48,29 @@ const schema = defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_session", ["sessionId"]),
-});
 
-export default schema;
+  orders: defineTable({
+    customerId: v.union(v.id("users"), v.string()),
+    customerName: v.string(),
+    phone: v.string(),
+    address: v.string(),
+    governorate: v.string(),
+    items: v.array(
+      v.object({
+        productId: v.id("products"),
+        productName: v.string(),
+        productImage: v.optional(v.string()),
+        price: v.number(),
+        quantity: v.number(),
+      }),
+    ),
+    totalAmount: v.number(),
+    status: v.string(),
+    paymentMethod: v.string(),
+    paymentStatus: v.string(),
+    senderWallet: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_customer", ["customerId"])
+    .index("by_created_at", ["createdAt"]),
+});

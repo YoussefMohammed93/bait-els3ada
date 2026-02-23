@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 export const getStats = query({
   args: {
@@ -182,20 +183,63 @@ export const getRecentOrders = query({
 export const getBestSellers = query({
   args: {
     limit: v.optional(v.number()),
+    month: v.optional(v.string()),
+    year: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 5;
-    // In a real app, we'd aggregate from orders. For now, let's just return products.
-    // Ideally: count occurrences in "orders" items.
-    const products = await ctx.db.query("products").take(limit);
 
-    return products.map((p) => ({
-      name: p.name,
-      category: p.category,
-      sales: Math.floor(Math.random() * 100), // Mock sales count for now
-      image: p.image,
-      price: `${p.price.toLocaleString()} ج.م`,
-    }));
+    let orders;
+    if (args.month && args.year) {
+      const month = parseInt(args.month);
+      const year = parseInt(args.year);
+      const startOfPeriod = new Date(year, month - 1, 1).getTime();
+      const endOfPeriod = new Date(year, month, 0, 23, 59, 59, 999).getTime();
+
+      orders = await ctx.db
+        .query("orders")
+        .withIndex("by_created_at", (q) =>
+          q.gte("createdAt", startOfPeriod).lte("createdAt", endOfPeriod),
+        )
+        .collect();
+    } else {
+      orders = await ctx.db.query("orders").collect();
+    }
+
+    // Aggregate sales by productId
+    const salesMap = new Map<string, number>();
+
+    orders.forEach((order) => {
+      if (order.status === "cancelled") return;
+
+      order.items.forEach((item) => {
+        const currentSales = salesMap.get(item.productId) || 0;
+        salesMap.set(item.productId, currentSales + item.quantity);
+      });
+    });
+
+    // Convert map to array and sort by quantity
+    const sortedSales = Array.from(salesMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit);
+
+    // Fetch product details for the best sellers
+    const results = await Promise.all(
+      sortedSales.map(async ([productId, sales]) => {
+        const product = await ctx.db.get(productId as Id<"products">);
+        if (!product) return null;
+
+        return {
+          name: product.name,
+          category: product.category,
+          sales: sales,
+          image: product.image,
+          price: `${product.price.toLocaleString()} ج.م`,
+        };
+      }),
+    );
+
+    return results.filter((r) => r !== null);
   },
 });
 
@@ -206,6 +250,8 @@ function mapStatusToArabic(status: string) {
     shipped: "جاري الشحن",
     completed: "مكتمل",
     cancelled: "ملغي",
+    declined: "مرفوض",
+    failed: "فشل في الدفع",
   };
   return map[status] || status;
 }
@@ -217,6 +263,8 @@ function getStatusColor(status: string) {
     shipped: "bg-orange-500/10 text-orange-600",
     completed: "bg-emerald-500/10 text-emerald-600",
     cancelled: "bg-rose-500/10 text-rose-600",
+    declined: "bg-rose-500/10 text-rose-600",
+    failed: "bg-rose-500/10 text-rose-600",
   };
   return map[status] || "bg-gray-500/10 text-gray-600";
 }

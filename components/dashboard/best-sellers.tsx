@@ -7,17 +7,29 @@ import { api } from "@/convex/_generated/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface BestSellersProps {
+  month?: string;
+  year?: string;
   isPast?: boolean;
   isCurrent?: boolean;
   isFuture?: boolean;
 }
 
-export function BestSellers({ isPast, isCurrent, isFuture }: BestSellersProps) {
-  const products = useQuery(api.dashboard.getBestSellers, { limit: 5 });
+export function BestSellers({
+  month,
+  year,
+  isPast,
+  isCurrent,
+  isFuture,
+}: BestSellersProps) {
+  const products = useQuery(api.dashboard.getBestSellers, {
+    limit: 5,
+    month: month,
+    year: year,
+  });
 
   if (!products) {
     return (
-      <div className="rounded-2xl border bg-card h-full flex flex-col overflow-hidden min-h-[460px]">
+      <div className="rounded-2xl border bg-card sm:h-full flex flex-col overflow-hidden sm:min-h-[460px]">
         <div className="px-6 py-4 border-b">
           <Skeleton className="h-6 w-40" />
         </div>
@@ -37,7 +49,7 @@ export function BestSellers({ isPast, isCurrent, isFuture }: BestSellersProps) {
   }
 
   return (
-    <div className="rounded-2xl border bg-card h-full flex flex-col overflow-hidden min-h-[460px]">
+    <div className="rounded-2xl border bg-card sm:h-full flex flex-col overflow-hidden sm:min-h-[460px]">
       <div className="px-6 py-4 border-b">
         <h3 className="text-lg font-bold">المنتجات الأكثر مبيعاً</h3>
       </div>
@@ -66,7 +78,7 @@ export function BestSellers({ isPast, isCurrent, isFuture }: BestSellersProps) {
           </p>
         </div>
       ) : (
-        <div className="flex-1 p-6 sm:space-y-6 flex sm:flex-col overflow-x-auto sm:overflow-x-hidden sm:overflow-y-auto gap-4 sm:gap-0 scrollbar-hide">
+        <div className="flex-1 p-6 sm:space-y-6 flex sm:flex-col items-start overflow-x-auto sm:overflow-x-hidden sm:overflow-y-auto gap-4 sm:gap-0 scrollbar-hide">
           {products.map((product, index) => (
             <div
               key={`${product.name}-${index}`}

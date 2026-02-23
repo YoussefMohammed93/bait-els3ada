@@ -31,6 +31,11 @@ export const list = query({
           ? new Date(lastOrder.createdAt).toISOString()
           : null;
 
+        // Extract address from latest order if available
+        const latestAddress = lastOrder
+          ? `${lastOrder.governorate}، ${lastOrder.address}`
+          : "غير محدد";
+
         // Active if joined or ordered in last 30 days
         const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const isActive =
@@ -41,14 +46,14 @@ export const list = query({
           id: user._id,
           name: user.name || "عميل غير معروف",
           phone: user.phone || "بدون رقم",
-          email: user.email || "بدون بريد",
-          address: "غير محدد", // Can be extended with address fields later
+          email: user.email && user.email !== "none" ? user.email : "بدون بريد",
+          address: latestAddress,
           totalOrders,
           totalSpent,
           status: isActive ? "نشط" : "غير نشط",
           joinDate: user.createdAt
             ? new Date(user.createdAt).toISOString()
-            : "2024-01-01",
+            : "2024-01-01T00:00:00.000Z",
           lastOrderDate,
         };
       }),

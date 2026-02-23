@@ -54,7 +54,13 @@ export const get = query({
 
     return {
       ...cart,
-      items: itemsWithDetails.filter((item) => item.product !== null),
+      items: itemsWithDetails.filter(
+        (
+          item: (typeof itemsWithDetails)[0],
+        ): item is (typeof itemsWithDetails)[0] & {
+          product: Doc<"products">;
+        } => item.product !== null,
+      ),
     };
   },
 });
@@ -133,9 +139,10 @@ export const syncCart = mutation({
     if (userCart) {
       // Merge items
       const mergedItems = [...userCart.items];
-      guestCart.items.forEach((gItem) => {
+      guestCart.items.forEach((gItem: Doc<"carts">["items"][number]) => {
         const existing = mergedItems.find(
-          (uItem) => uItem.productId === gItem.productId,
+          (uItem: Doc<"carts">["items"][number]) =>
+            uItem.productId === gItem.productId,
         );
         if (existing) {
           existing.quantity = Math.max(existing.quantity, gItem.quantity);

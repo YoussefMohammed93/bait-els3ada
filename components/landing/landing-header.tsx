@@ -34,6 +34,7 @@ import { useLenis } from "@/components/smooth-scroll";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { AuthDialog } from "@/components/auth/auth-form";
+import { MyOrdersDialog } from "@/components/orders/my-orders-dialog";
 
 const SiteHeader = () => {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -47,6 +48,7 @@ const SiteHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [ordersOpen, setOrdersOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -237,17 +239,14 @@ const SiteHeader = () => {
                           <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
                             نشاطي
                           </p>
-                          <Link href="/orders" className="w-full">
-                            <Button
-                              variant="ghost"
-                              className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
-                            >
-                              <Package className="h-4 w-4" />
-                              <span className="text-sm font-medium">
-                                طلباتي
-                              </span>
-                            </Button>
-                          </Link>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setOrdersOpen(true)}
+                            className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
+                          >
+                            <Package className="h-4 w-4" />
+                            <span className="text-sm font-medium">طلباتي</span>
+                          </Button>
                           <Link href="/wishlist" className="w-full">
                             <Button
                               variant="ghost"
@@ -344,6 +343,19 @@ const SiteHeader = () => {
                       {link.name}
                     </a>
                   ))}
+                  {isAuthenticated && (
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-4 h-14 px-4 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
+                      onClick={() => {
+                        setIsOpen(false);
+                        setOrdersOpen(true);
+                      }}
+                    >
+                      <Package className="h-5 w-5" />
+                      <span className="text-base font-medium">طلباتي</span>
+                    </Button>
+                  )}
                   {!mounted || isLoading ? (
                     <Skeleton className="w-full mt-4 rounded-xl h-12 md:hidden" />
                   ) : (
@@ -370,6 +382,7 @@ const SiteHeader = () => {
         </div>
       </header>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+      <MyOrdersDialog open={ordersOpen} onOpenChange={setOrdersOpen} />
     </>
   );
 };

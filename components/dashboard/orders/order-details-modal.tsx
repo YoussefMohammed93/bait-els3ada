@@ -14,20 +14,24 @@ import {
   MapPin,
 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useMutation } from "convex/react";
 import type { Order } from "./orders-table";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface OrderDetailsModalProps {
   open: boolean;
@@ -37,27 +41,37 @@ interface OrderDetailsModalProps {
 
 const statusConfig: Record<
   string,
-  { className: string; Icon: React.ElementType; label: string }
+  { className: string; Icon: React.ElementType; label: string; value: string }
 > = {
-  مكتمل: {
-    className: "bg-emerald-500/10 text-emerald-600",
-    Icon: CheckCircle2,
-    label: "مكتمل",
+  "قيد الانتظار": {
+    className: "bg-slate-500/10 text-slate-600",
+    Icon: Clock,
+    label: "قيد الانتظار",
+    value: "pending",
   },
   "قيد التنفيذ": {
     className: "bg-blue-500/10 text-blue-600",
     Icon: Clock,
     label: "قيد التنفيذ",
+    value: "processing",
   },
   "جاري الشحن": {
     className: "bg-orange-500/10 text-orange-600",
     Icon: Truck,
     label: "جاري الشحن",
+    value: "shipped",
+  },
+  مكتمل: {
+    className: "bg-emerald-500/10 text-emerald-600",
+    Icon: CheckCircle2,
+    label: "مكتمل",
+    value: "completed",
   },
   ملغي: {
     className: "bg-destructive/10 text-destructive",
     Icon: XCircle,
     label: "ملغي",
+    value: "cancelled",
   },
 };
 
@@ -66,19 +80,44 @@ export function OrderDetailsModal({
   onOpenChange,
   order,
 }: OrderDetailsModalProps) {
+  const updateStatus = useMutation(api.orders.updateOrderStatus);
+
   if (!order) return null;
 
+  const currentStatus = order.status;
   const { className: statusClass, Icon: StatusIcon } =
-    statusConfig[order.status];
+    statusConfig[currentStatus] || statusConfig["قيد الانتظار"];
+
+  const handleStatusChange = async (newArabicStatus: string) => {
+    const config = statusConfig[newArabicStatus];
+    if (!config) return;
+
+    const backendStatus = config.value as
+      | "pending"
+      | "processing"
+      | "shipped"
+      | "completed"
+      | "cancelled";
+    try {
+      await updateStatus({
+        orderId: order._id as Id<"orders">,
+        status: backendStatus,
+      });
+      toast.success("تم تحديث حالة الطلب بنجاح");
+    } catch (error) {
+      toast.error("فشل في تحديث حالة الطلب");
+      console.error(error);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-2xl max-w-lg max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="px-6 pt-6 pb-0">
-          <DialogTitle className="text-lg font-bold text-foreground">
+          <DialogTitle className="text-lg font-bold text-foreground text-right">
             تفاصيل الطلب {order.id}
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground font-medium">
+          <DialogDescription className="text-sm text-muted-foreground font-medium text-right">
             معلومات كاملة عن هذا الطلب وإدارة الحالات
           </DialogDescription>
         </DialogHeader>
@@ -94,16 +133,24 @@ export function OrderDetailsModal({
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${statusClass}`}
               >
                 <StatusIcon className="size-3.5" />
-                {order.status}
+                {currentStatus}
               </span>
             </div>
-            <Select defaultValue={order.status}>
+            <Select
+              defaultValue={currentStatus}
+              onValueChange={handleStatusChange}
+            >
               <SelectTrigger className="w-full rounded-xl border-muted-foreground/20 font-bold h-11">
                 <SelectValue placeholder="اختر حالة جديدة" />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(statusConfig).map(([key, config]) => (
-                  <SelectItem key={key} value={key} className="font-bold">
+                  <SelectItem
+                    key={key}
+                    value={key}
+                    className="font-bold text-right"
+                    dir="rtl"
+                  >
                     <div className="flex items-center gap-2">
                       <config.Icon className="size-4" />
                       {config.label}
@@ -166,6 +213,26 @@ export function OrderDetailsModal({
               </div>
             </div>
 
+            {/* Sender Wallet (Only for Vodafone Cash) */}
+            {order.paymentMethod === "فودافون كاش" && order.senderWallet && (
+              <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 border border-amber-200 group">
+                <div className="text-right">
+                  <p className="text-[11px] text-amber-700 font-bold mb-0.5">
+                    محفظة المرسل (التحقق)
+                  </p>
+                  <p
+                    className="font-bold text-amber-900 text-sm tabular-nums"
+                    dir="ltr"
+                  >
+                    {order.senderWallet}
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-amber-100 text-amber-700">
+                  <Phone className="size-5" />
+                </div>
+              </div>
+            )}
+
             {/* Order Date */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-card border group">
               <div className="text-right">
@@ -213,7 +280,7 @@ export function OrderDetailsModal({
                 >
                   <div className="relative size-14 rounded-xl overflow-hidden border bg-white shrink-0">
                     <Image
-                      src={product.image}
+                      src={product.image || "/placeholder.png"}
                       alt={product.name}
                       fill
                       className="object-contain p-1"

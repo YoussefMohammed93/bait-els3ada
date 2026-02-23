@@ -133,6 +133,8 @@ export default function DashboardPage() {
         </div>
         <div className="lg:col-span-1 min-w-0">
           <BestSellers
+            month={selectedMonth}
+            year={selectedYear}
             isPast={isPast}
             isCurrent={isCurrent}
             isFuture={isFuture}

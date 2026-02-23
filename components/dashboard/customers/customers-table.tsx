@@ -44,6 +44,21 @@ const statusConfig: Record<
   },
 };
 
+const formatDate = (dateString: string) => {
+  if (!dateString) return "—";
+  
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("ar-EG", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date);
+  } catch {
+    return dateString;
+  }
+};
+
 export function CustomersTable({
   customers,
   currentPage,
@@ -61,7 +76,6 @@ export function CustomersTable({
               <tr>
                 <th className="px-5 py-3.5 font-bold">الاسم</th>
                 <th className="px-5 py-3.5 font-bold">رقم الهاتف</th>
-                <th className="px-5 py-3.5 font-bold">البريد الإلكتروني</th>
                 <th className="px-5 py-3.5 font-bold">عدد الطلبات</th>
                 <th className="px-5 py-3.5 font-bold">إجمالي الإنفاق</th>
                 <th className="px-5 py-3.5 font-bold text-center">الحالة</th>
@@ -87,12 +101,6 @@ export function CustomersTable({
                     >
                       {customer.phone}
                     </td>
-                    <td
-                      className="px-5 py-3 text-muted-foreground font-medium text-sm"
-                      dir="ltr"
-                    >
-                      {customer.email}
-                    </td>
                     <td className="px-5 py-3 font-bold text-foreground tabular-nums">
                       {customer.totalOrders}
                     </td>
@@ -109,8 +117,8 @@ export function CustomersTable({
                         </span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground font-medium text-xs whitespace-nowrap">
-                      {customer.joinDate}
+                    <td className="px-5 py-3 text-muted-foreground font-bold text-base tabular-nums whitespace-nowrap">
+                      {formatDate(customer.joinDate)}
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex items-center justify-center">
@@ -155,21 +163,6 @@ export function CustomersTable({
                 </span>
               </div>
 
-              <div className="space-y-1">
-                <p
-                  className="text-xs text-muted-foreground font-medium"
-                  dir="ltr"
-                >
-                  {customer.phone}
-                </p>
-                <p
-                  className="text-xs text-muted-foreground font-medium"
-                  dir="ltr"
-                >
-                  {customer.email}
-                </p>
-              </div>
-
               <div className="flex items-center justify-between gap-6 border-t pt-3 text-sm">
                 <div>
                   <span className="text-sm text-muted-foreground font-bold block">
@@ -191,8 +184,8 @@ export function CustomersTable({
                   <span className="text-sm text-muted-foreground font-bold block">
                     الانضمام
                   </span>
-                  <span className="font-bold text-muted-foreground text-sm">
-                    {customer.joinDate}
+                  <span className="font-bold text-foreground text-sm tabular-nums">
+                    {formatDate(customer.joinDate)}
                   </span>
                 </div>
               </div>

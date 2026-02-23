@@ -20,13 +20,15 @@ export interface OrderProduct {
 
 export interface Order {
   id: string;
+  _id: string; // Original Convex ID
   customer: string;
   phone: string;
   address: string;
   products: OrderProduct[];
   amount: number;
-  status: "مكتمل" | "قيد التنفيذ" | "جاري الشحن" | "ملغي";
+  status: "مكتمل" | "قيد التنفيذ" | "جاري الشحن" | "ملغي" | "قيد الانتظار";
   paymentMethod: string;
+  senderWallet?: string;
   date: string;
 }
 
@@ -57,6 +59,10 @@ const statusConfig: Record<
   ملغي: {
     className: "bg-destructive/10 text-destructive",
     Icon: XCircle,
+  },
+  "قيد الانتظار": {
+    className: "bg-slate-500/10 text-slate-600",
+    Icon: Clock,
   },
 };
 

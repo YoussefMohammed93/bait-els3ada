@@ -3,11 +3,9 @@
 import {
   User,
   Phone,
-  Mail,
   MapPin,
   ShoppingCart,
   Wallet,
-  CalendarDays,
   Clock,
   CheckCircle2,
   XCircle,
@@ -25,6 +23,23 @@ interface CustomerDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   customer: Customer | null;
 }
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return "—";
+
+  try {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("ar-EG", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
+  } catch {
+    return dateString;
+  }
+};
 
 export function CustomerDetailsModal({
   open,
@@ -93,25 +108,12 @@ export function CustomerDetailsModal({
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-violet-100/50 text-violet-600 shrink-0">
-                  <Mail className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    البريد الإلكتروني
-                  </p>
-                  <p className="text-sm font-bold text-foreground" dir="ltr">
-                    {customer.email}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-orange-100/50 text-orange-600 shrink-0">
                   <MapPin className="size-4" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground font-medium">
-                    العنوان
+                    العنوان الحالي (من آخر طلب)
                   </p>
                   <p className="text-sm font-bold text-foreground">
                     {customer.address}
@@ -159,32 +161,19 @@ export function CustomerDetailsModal({
           {/* Dates */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold text-muted-foreground">
-              التواريخ
+              سجلات التواريخ
             </h4>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-emerald-100/50 text-emerald-600 shrink-0">
-                  <CalendarDays className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    تاريخ الانضمام
-                  </p>
-                  <p className="text-sm font-bold text-foreground">
-                    {customer.joinDate}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-start gap-3">
                 <div className="p-2 rounded-xl bg-blue-100/50 text-blue-600 shrink-0">
                   <Clock className="size-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    آخر طلب
+                  <p className="text-sm text-muted-foreground font-medium">
+                    آخر عملية طلب
                   </p>
-                  <p className="text-sm font-bold text-foreground">
-                    {customer.lastOrderDate}
+                  <p className="text-base font-bold text-foreground tabular-nums">
+                    {formatDate(customer.lastOrderDate)}
                   </p>
                 </div>
               </div>
