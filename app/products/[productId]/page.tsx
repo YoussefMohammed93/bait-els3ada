@@ -526,9 +526,9 @@ export default function ProductDetailPage({
                         : "غير متاح"}
                   </Button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (!product) return;
-                      const added = toggleItem(product._id);
+                      const added = await toggleItem(product._id);
                       if (added) {
                         toast.success("تم الإضافة للمفضلة");
                       } else {

@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  CreditCard,
   Truck,
   Smartphone,
   CheckCircle2,
@@ -29,12 +28,12 @@ import {
 import { useState } from "react";
 import NextImage from "next/image";
 import { toPng } from "html-to-image";
+import { useMutation } from "convex/react";
+import { useCart } from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
-  import { useMutation } from "convex/react";
-  import { useCart } from "@/hooks/use-cart";
-  import { Input } from "@/components/ui/input";
-  import { Label } from "@/components/ui/label";
-  import { api } from "@/convex/_generated/api";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 
 const GOVERNORATES = [
@@ -326,9 +325,7 @@ export function CheckoutDialog({
                   <span className="text-xs font-bold">
                     {orderDetails?.paymentMethod === "cod"
                       ? "عند الاستلام"
-                      : orderDetails?.paymentMethod === "vodafone"
-                        ? "فودافون كاش"
-                        : "إلكتروني"}
+                      : "فودافون كاش"}
                   </span>
                 </div>
               </div>
@@ -655,7 +652,7 @@ export function CheckoutDialog({
               {/* Payment Methods (UI Only) */}
               <div className="space-y-3 pt-2">
                 <Label className="text-sm font-bold mr-1">طريقة الدفع</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
                     className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${
@@ -694,25 +691,6 @@ export function CheckoutDialog({
                   >
                     <Smartphone className="w-6 h-6" />
                     <span className="text-xs font-bold">فودافون كاش</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all ${
-                      formData.paymentMethod === "card"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : errors.paymentMethod
-                          ? "border-destructive"
-                          : "border-border/50 hover:border-border"
-                    }`}
-                    onClick={() => {
-                      setFormData({ ...formData, paymentMethod: "card" });
-                      if (errors.paymentMethod)
-                        setErrors({ ...errors, paymentMethod: "" });
-                    }}
-                  >
-                    <CreditCard className="w-6 h-6" />
-                    <span className="text-xs font-bold">بطاقة بنكية</span>
                   </button>
                 </div>
                 {errors.paymentMethod && (

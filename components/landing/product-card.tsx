@@ -1,13 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-
 import { toast } from "sonner";
 import { useState } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { Id } from "@/convex/_generated/dataModel";
-import { useWishlist } from "@/hooks/use-wishlist";
 import { Heart, ShoppingCart } from "lucide-react";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 interface ProductCardProps {
   product: {
@@ -37,11 +36,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const added = toggleItem(product._id);
-    if (added) {
+    const isAdded = await toggleItem(product._id);
+    if (isAdded) {
       toast.success("تم الإضافة للمفضلة");
     } else {
       toast.info("تم الإزالة من المفضلة");
@@ -69,13 +68,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </span>
         </div>
 
-        {/* Favorite Button */}
         <button
           onClick={handleToggleWishlist}
           className={`absolute top-4 left-4 z-20 p-2 rounded-full backdrop-blur-md border transition-all duration-300 ${
             isFavourite
-              ? "bg-red-500 text-white border-red-500"
-              : "bg-white/90 text-muted-foreground border-primary/10 hover:bg-white hover:text-red-400"
+              ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+              : "bg-white/90 text-muted-foreground border-primary/10 hover:bg-white hover:text-primary"
           }`}
         >
           <Heart

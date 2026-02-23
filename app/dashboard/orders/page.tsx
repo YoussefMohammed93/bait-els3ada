@@ -57,13 +57,7 @@ export default function OrdersPage() {
       amount: o.totalAmount,
       status: backendToFrontendStatus[o.status] || "قيد الانتظار",
       paymentMethod:
-        o.paymentMethod === "cod"
-          ? "الدفع عند الاستلام"
-          : o.paymentMethod === "vodafone"
-            ? "فودافون كاش"
-            : o.paymentMethod === "card"
-              ? "بطاقة بنكية"
-              : o.paymentMethod,
+        o.paymentMethod === "cod" ? "الدفع عند الاستلام" : "فودافون كاش",
       senderWallet: o.senderWallet,
       date: new Date(o.createdAt).toISOString().split("T")[0],
       products: o.items.map(

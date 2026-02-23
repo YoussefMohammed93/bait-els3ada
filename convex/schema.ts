@@ -73,4 +73,13 @@ export default defineSchema({
   })
     .index("by_customer", ["customerId"])
     .index("by_created_at", ["createdAt"]),
+
+  favorites: defineTable({
+    userId: v.optional(v.id("users")),
+    sessionId: v.optional(v.string()),
+    productIds: v.array(v.id("products")),
+    lastUpdated: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_session", ["sessionId"]),
 });

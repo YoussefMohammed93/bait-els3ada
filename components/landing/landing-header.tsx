@@ -35,6 +35,8 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { AuthDialog } from "@/components/auth/auth-form";
 import { MyOrdersDialog } from "@/components/orders/my-orders-dialog";
+import { FavoritesDialog } from "@/components/favorites/favorites-dialog";
+import { SettingsDialog } from "@/components/auth/settings-dialog";
 
 const SiteHeader = () => {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -49,6 +51,8 @@ const SiteHeader = () => {
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [ordersOpen, setOrdersOpen] = useState(false);
+  const [favoritesOpen, setFavoritesOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -247,34 +251,32 @@ const SiteHeader = () => {
                             <Package className="h-4 w-4" />
                             <span className="text-sm font-medium">طلباتي</span>
                           </Button>
-                          <Link href="/wishlist" className="w-full">
-                            <Button
-                              variant="ghost"
-                              className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
-                            >
-                              <Heart className="h-4 w-4" />
-                              <span className="text-sm font-medium">
-                                قائمة المفضلة
-                              </span>
-                            </Button>
-                          </Link>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setFavoritesOpen(true)}
+                            className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
+                          >
+                            <Heart className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                              قائمة المفضلة
+                            </span>
+                          </Button>
                         </div>
                         {/* Account Section */}
                         <div className="p-2 pt-0 border-t">
                           <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
                             الحساب
                           </p>
-                          <Link href="/settings" className="w-full">
-                            <Button
-                              variant="ghost"
-                              className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
-                            >
-                              <Settings className="h-4 w-4" />
-                              <span className="text-sm font-medium">
-                                الإعدادات
-                              </span>
-                            </Button>
-                          </Link>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setSettingsOpen(true)}
+                            className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span className="text-sm font-medium">
+                              الإعدادات
+                            </span>
+                          </Button>
                           {user?.userRole === "admin" && (
                             <Link href="/dashboard" className="w-full">
                               <Button
@@ -343,19 +345,6 @@ const SiteHeader = () => {
                       {link.name}
                     </a>
                   ))}
-                  {isAuthenticated && (
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-4 h-14 px-4 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
-                      onClick={() => {
-                        setIsOpen(false);
-                        setOrdersOpen(true);
-                      }}
-                    >
-                      <Package className="h-5 w-5" />
-                      <span className="text-base font-medium">طلباتي</span>
-                    </Button>
-                  )}
                   {!mounted || isLoading ? (
                     <Skeleton className="w-full mt-4 rounded-xl h-12 md:hidden" />
                   ) : (
@@ -383,6 +372,8 @@ const SiteHeader = () => {
       </header>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <MyOrdersDialog open={ordersOpen} onOpenChange={setOrdersOpen} />
+      <FavoritesDialog open={favoritesOpen} onOpenChange={setFavoritesOpen} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
 };
