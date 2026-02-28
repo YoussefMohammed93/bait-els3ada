@@ -2,7 +2,6 @@
 
 import {
   Heart,
-  ShoppingCart,
   ChevronRight,
   Package,
   ZoomIn,
@@ -13,17 +12,18 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
+
 import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useQuery } from "convex/react";
-import { useCart } from "@/hooks/use-cart";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import { Id } from "@/convex/_generated/dataModel";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 import ProductCard from "@/components/landing/product-card";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { WhatsAppOrderButton } from "@/components/whatsapp-order-button";
 
 export default function ProductDetailPage({
   params,
@@ -42,15 +42,9 @@ export default function ProductDetailPage({
   // ─── State ──────────────────────────────────────
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const { addItem, items } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
 
   const isFavourite = product ? isInWishlist(product._id) : false;
-
-  const isAlreadyInCart = items.some(
-    (item) => item.productId === params.productId,
-  );
 
   // Image modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -62,10 +56,12 @@ export default function ProductDetailPage({
 
   // Combine main image + additional images
   const allImages = product
-    ? [
+    ? ([
         product.image,
-        ...(product.images || []).filter((img) => img !== product.image),
-      ].filter(Boolean)
+        ...(product.images || []).filter(
+          (img: string) => img !== product.image,
+        ),
+      ].filter(Boolean) as string[])
     : [];
 
   // ─── Modal Handlers ─────────────────────────────
@@ -236,15 +232,6 @@ export default function ProductDetailPage({
     closeModal,
   ]);
 
-  // ─── Cart Handlers ──────────────────────────────
-  const handleAddToCart = useCallback(() => {
-    if (!product) return;
-    addItem(product._id, quantity);
-    setAddedToCart(true);
-    toast.success("تم اضافة المنتج للسلة");
-    setTimeout(() => setAddedToCart(false), 2000);
-  }, [product, quantity, addItem]);
-
   // ─── Loading State ──────────────────────────────
   if (product === undefined) {
     return (
@@ -411,7 +398,7 @@ export default function ProductDetailPage({
               {/* Thumbnail Gallery */}
               {allImages.length > 1 && (
                 <div className="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
-                  {allImages.map((img, index) => (
+                  {allImages.map((img: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
@@ -512,19 +499,16 @@ export default function ProductDetailPage({
 
                 {/* Action Buttons */}
                 <div className="w-full flex flex-col-reverse sm:flex-row gap-3 pt-2">
-                  <Button
-                    onClick={handleAddToCart}
-                    disabled={!isInStock || addedToCart || isAlreadyInCart}
-                    className="w-full h-14 rounded-2xl text-base font-bold gap-2 transition-all"
-                    size="lg"
-                  >
-                    <ShoppingCart className="size-5" />
-                    {addedToCart || isAlreadyInCart
-                      ? "تم اضافة المنتج للسلة"
-                      : isInStock
-                        ? "إضافة للسلة"
-                        : "غير متاح"}
-                  </Button>
+                  <WhatsAppOrderButton
+                    productName={product.name}
+                    productPrice={product.price}
+                    productUrl={
+                      typeof window !== "undefined" ? window.location.href : ""
+                    }
+                    quantity={quantity}
+                    className="w-full h-14 text-base"
+                  />
+
                   <button
                     onClick={async () => {
                       if (!product) return;
@@ -567,7 +551,7 @@ export default function ProductDetailPage({
                 </Button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {relatedProducts.map((rp) => (
+                {relatedProducts.map((rp: Doc<"products">) => (
                   <ProductCard key={rp._id} product={rp} />
                 ))}
               </div>

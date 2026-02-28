@@ -72,7 +72,6 @@ export const create = mutation({
     images: v.optional(v.array(v.string())),
     status: v.string(),
     dateAdded: v.string(),
-    isCodAvailable: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("products", args);
@@ -91,7 +90,6 @@ export const update = mutation({
     images: v.optional(v.array(v.string())),
     status: v.string(),
     dateAdded: v.string(),
-    isCodAvailable: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { id, ...data } = args;

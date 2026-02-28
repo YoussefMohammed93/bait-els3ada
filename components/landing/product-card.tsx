@@ -1,12 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-import { useState } from "react";
-import { useCart } from "@/hooks/use-cart";
-import { Button } from "@/components/ui/button";
+import { Heart } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
-import { Heart, ShoppingCart } from "lucide-react";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { WhatsAppOrderButton } from "@/components/whatsapp-order-button";
 
 interface ProductCardProps {
   product: {
@@ -20,21 +18,9 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { addItem, items } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
-  const [isAdded, setIsAdded] = useState(false);
 
   const isFavourite = isInWishlist(product._id);
-  const isAlreadyInCart = items.some((item) => item.productId === product._id);
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem(product._id, 1);
-    setIsAdded(true);
-    toast.success("تم اضافة المنتج للسلة");
-    setTimeout(() => setIsAdded(false), 2000);
-  };
 
   const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -106,15 +92,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </span>
           </div>
 
-          <Button
-            onClick={handleAddToCart}
-            disabled={isAdded || isAlreadyInCart}
+          <WhatsAppOrderButton
+            productName={product.name}
+            productPrice={product.price}
+            productUrl={`${window.location.origin}/products/${product._id}`}
             size="sm"
-            className="rounded-full px-4 h-10 font-bold transition-all"
-          >
-            <ShoppingCart className="size-4" />
-            {isAdded || isAlreadyInCart ? "تم الإضافة" : "إضافة للسلة"}
-          </Button>
+            label="اطلب الان"
+            className="h-10 px-4"
+          />
         </div>
       </div>
     </Link>

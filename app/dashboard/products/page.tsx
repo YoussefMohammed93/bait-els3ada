@@ -6,8 +6,8 @@ import {
   XCircle,
   CheckCircle2,
   AlertTriangle,
-  Database,
 } from "lucide-react";
+
 import * as React from "react";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
@@ -74,7 +74,6 @@ export default function ProductsPage() {
   const createProduct = useMutation(api.products.create);
   const updateProduct = useMutation(api.products.update);
   const removeProduct = useMutation(api.products.remove);
-  const seedProducts = useMutation(api.seed.seedProducts);
 
   // Modals
   const [addModalOpen, setAddModalOpen] = React.useState(false);
@@ -120,7 +119,6 @@ export default function ProductsPage() {
         image: data.image || "/placeholder-product.jpg",
         images: data.images?.length ? data.images : undefined,
         dateAdded: new Date().toISOString().split("T")[0],
-        isCodAvailable: data.isCodAvailable,
       });
       toast.success("تم إضافة المنتج بنجاح");
       setAddModalOpen(false);
@@ -151,7 +149,6 @@ export default function ProductsPage() {
         image: data.image || editProduct.image,
         images: data.images?.length ? data.images : editProduct.images,
         dateAdded: editProduct.dateAdded,
-        isCodAvailable: data.isCodAvailable,
       });
       toast.success("تم تحديث المنتج بنجاح");
       setEditProduct(null);
@@ -183,18 +180,6 @@ export default function ProductsPage() {
     setSortBy("newest");
   };
 
-  const handleSeedProducts = async () => {
-    setIsActionLoading(true);
-    try {
-      const result = await seedProducts();
-      toast.success(`تم إضافة ${result.count} منتج بنجاح`);
-    } catch {
-      toast.error("حدث خطأ أثناء إضافة المنتجات التجريبية");
-    } finally {
-      setIsActionLoading(false);
-    }
-  };
-
   const handlePageChange = (page: number) => {
     if (page > currentPage && status === "CanLoadMore") {
       loadMore(ITEMS_PER_PAGE);
@@ -215,19 +200,6 @@ export default function ProductsPage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            variant="outline"
-            onClick={handleSeedProducts}
-            disabled={isActionLoading}
-            className="rounded-xl font-bold gap-2 px-6 h-11 border-primary/20 hover:bg-primary/5 text-primary"
-          >
-            {isActionLoading ? (
-              <Loader className="size-4 animate-spin" />
-            ) : (
-              <Database className="size-4" />
-            )}
-            توليد منتجات تجريبية
-          </Button>
           <Button
             onClick={() => setAddModalOpen(true)}
             className="w-full sm:w-auto rounded-xl font-bold gap-2 px-6 h-11 self-start"
@@ -407,7 +379,6 @@ export default function ProductsPage() {
                 stock: editProduct.stock.toString(),
                 image: editProduct.image,
                 images: editProduct.images ?? [],
-                isCodAvailable: editProduct.isCodAvailable ?? false,
               }
             : null
         }

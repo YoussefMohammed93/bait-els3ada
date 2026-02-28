@@ -1,234 +1,123 @@
 "use client";
 
 import * as React from "react";
-import { useQuery } from "convex/react";
+import { Users, Search } from "lucide-react";
 import { api } from "@/convex/_generated/api";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  CustomersTable,
-  type Customer,
-} from "@/components/dashboard/customers/customers-table";
-import { Users, UserCheck, UserX, UserPlus } from "lucide-react";
-import { CustomersFilters } from "@/components/dashboard/customers/customers-filters";
-import { CustomersEmptyState } from "@/components/dashboard/customers/customers-empty-state";
-import { CustomerDetailsModal } from "@/components/dashboard/customers/customer-details-modal";
+import { usePaginatedQuery, useQuery } from "convex/react";
+import { CustomersTable } from "@/components/dashboard/customers/customers-table";
+import { CustomersStats } from "@/components/dashboard/customers/customers-stats";
 
 const ITEMS_PER_PAGE = 8;
 
 export default function CustomersPage() {
-  // Filters
   const [search, setSearch] = React.useState("");
-  const [status, setStatus] = React.useState("all");
-  const [sortBy, setSortBy] = React.useState("newest");
-
-  // Data fetching
-  const customers = useQuery(api.customers.list, { search, status, sortBy });
-  const stats = useQuery(api.customers.getStats);
-
-  // Pagination
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [debouncedSearch, setDebouncedSearch] = React.useState("");
 
-  // Modal
-  const [selectedCustomer, setSelectedCustomer] =
-    React.useState<Customer | null>(null);
-
-  // Reset pagination on filter change
+  // Debounce search
   React.useEffect(() => {
-    setCurrentPage(1);
-  }, [search, status, sortBy]);
+    const timer = setTimeout(() => setDebouncedSearch(search), 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const handleResetFilters = () => {
-    setSearch("");
-    setStatus("all");
-    setSortBy("newest");
-  };
+  // Fetch data
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.customers.list,
+    { search: debouncedSearch || undefined },
+    { initialNumItems: ITEMS_PER_PAGE * currentPage },
+  );
 
-  const isLoading = customers === undefined || stats === undefined;
+  const stats = useQuery(api.customers.getStats);
+  const totalCount = useQuery(api.customers.count, {
+    search: debouncedSearch || undefined,
+  });
 
-  // Pagination logic (client-side for now as the total result set is unlikely to be massive immediately)
-  const totalPages = customers
-    ? Math.ceil(customers.length / ITEMS_PER_PAGE)
-    : 0;
-  const paginatedCustomers = customers
-    ? customers.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE,
-      )
-    : [];
+  const isLoading = status === "LoadingFirstPage";
+
+  const paginatedResults = results.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  const totalPages = Math.ceil((totalCount ?? 0) / ITEMS_PER_PAGE) || 1;
 
   return (
-    <div className="space-y-5">
-      {/* Page Header */}
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
             إدارة العملاء
           </h2>
           <p className="text-muted-foreground font-medium">
-            تابعي وأديري بيانات جميع العملاء وسجلاتهم من هنا.
+            عرض وإدارة جميع العملاء المسجلين في متجرك.
           </p>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {isLoading ? (
-          [1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-2xl border bg-card p-5 h-[104px]">
-              <div className="flex items-start gap-5">
-                <Skeleton className="size-14 rounded-2xl" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-7 w-24" />
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <>
-            <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:border-primary/20">
-              <div className="flex items-start gap-5">
-                <div className="p-3.5 rounded-2xl bg-blue-100/50 text-blue-600 shrink-0">
-                  <Users className="size-7" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-muted-foreground tracking-wide">
-                    إجمالي العملاء
-                  </h3>
-                  <div className="flex items-end gap-2 my-1">
-                    <p className="text-2xl font-bold text-foreground tabular-nums tracking-tight">
-                      {stats.totalCustomers}
-                    </p>
-                    <p className="text-[11px] font-bold text-muted-foreground/60">
-                      جميع العملاء
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:border-primary/20">
-              <div className="flex items-start gap-5">
-                <div className="p-3.5 rounded-2xl bg-emerald-100/50 text-emerald-600 shrink-0">
-                  <UserCheck className="size-7" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-muted-foreground tracking-wide">
-                    عملاء نشطين
-                  </h3>
-                  <div className="flex items-end gap-2 my-1">
-                    <p className="text-2xl font-bold text-foreground tabular-nums tracking-tight">
-                      {stats.activeCustomers}
-                    </p>
-                    <p className="text-[11px] font-bold text-emerald-600/60">
-                      طلبوا مؤخراً
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:border-primary/20">
-              <div className="flex items-start gap-5">
-                <div className="p-3.5 rounded-2xl bg-orange-100/50 text-orange-600 shrink-0">
-                  <UserX className="size-7" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-muted-foreground tracking-wide">
-                    عملاء غير نشطين
-                  </h3>
-                  <div className="flex items-end gap-2 my-1">
-                    <p className="text-2xl font-bold text-foreground tabular-nums tracking-tight">
-                      {stats.inactiveCustomers}
-                    </p>
-                    <p className="text-[11px] font-bold text-orange-600/60">
-                      لم يطلبوا منذ فترة
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:border-primary/20">
-              <div className="flex items-start gap-5">
-                <div className="p-3.5 rounded-2xl bg-violet-100/50 text-violet-600 shrink-0">
-                  <UserPlus className="size-7" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-muted-foreground tracking-wide">
-                    عملاء جدد
-                  </h3>
-                  <div className="flex items-end gap-2 my-1">
-                    <p className="text-2xl font-bold text-foreground tabular-nums tracking-tight">
-                      {stats.newThisMonth}
-                    </p>
-                    <p className="text-[11px] font-bold text-violet-600/60">
-                      انضموا هذا الشهر
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+      {/* Stats Section */}
+      <CustomersStats stats={stats} />
 
       {/* Filters */}
-      <CustomersFilters
-        search={search}
-        onSearchChange={setSearch}
-        status={status}
-        onStatusChange={setStatus}
-        sortBy={sortBy}
-        onReset={handleResetFilters}
-        onSortChange={setSortBy}
-      />
-
-      {/* Results count */}
-      <div className="flex items-center justify-between px-1">
-        {isLoading ? (
-          <Skeleton className="h-5 w-32" />
-        ) : (
-          <p className="text-sm text-muted-foreground font-medium">
-            عرض{" "}
-            <span className="font-bold text-foreground">
-              {customers.length}
-            </span>{" "}
-            عميل
-          </p>
-        )}
+      <div className="relative group">
+        <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <Input
+          placeholder="ابحث بالاسم، البريد أو الهاتف..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pr-11 pl-4 h-12 bg-white rounded-2xl focus:border-primary/30 focus:ring-primary/10 font-bold transition-all"
+        />
       </div>
 
-      {/* Table / Empty State */}
       {isLoading ? (
-        <div className="rounded-2xl border bg-card overflow-hidden">
-          <div className="p-5 space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
+        <div className="rounded-2xl border border-border/50 overflow-hidden bg-card">
+          <div className="bg-muted/50 h-12" />
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="p-4 border-t flex gap-4 items-center">
+              <Skeleton className="size-10 rounded-xl" />
+              <Skeleton className="h-5 flex-1" />
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+          ))}
         </div>
-      ) : customers.length > 0 ? (
+      ) : results.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-card/50 rounded-3xl border border-dashed border-border/50 text-center">
+          <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Users className="size-10 text-primary/40" />
+          </div>
+          <h3 className="text-xl font-bold text-foreground mb-1">
+            {search ? "لا توجد نتائج مطابقة" : "لا يوجد عملاء حتى الآن"}
+          </h3>
+          <p className="text-muted-foreground max-w-sm font-medium">
+            {search
+              ? "جرّب البحث بكلمات مختلفة أو تأكد من الكتابة بشكل صحيح."
+              : "عندما يبدأ العملاء بالتسجيل في متجرك، سيظهرون هنا."}
+          </p>
+          {search && (
+            <Button
+              onClick={() => setSearch("")}
+              className="mt-6 rounded-xl font-bold"
+            >
+              إعادة تعيين البحث
+            </Button>
+          )}
+        </div>
+      ) : (
         <CustomersTable
-          customers={paginatedCustomers as Customer[]}
+          customers={paginatedResults}
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          onViewDetails={setSelectedCustomer}
-        />
-      ) : (
-        <CustomersEmptyState
-          isFiltering={!!search.trim() || status !== "all"}
-          onReset={handleResetFilters}
+          onPageChange={(page) => {
+            if (page > currentPage && status === "CanLoadMore") {
+              loadMore(ITEMS_PER_PAGE);
+            }
+            setCurrentPage(page);
+          }}
         />
       )}
-
-      {/* Customer Details Modal */}
-      <CustomerDetailsModal
-        open={!!selectedCustomer}
-        onOpenChange={(open) => !open && setSelectedCustomer(null)}
-        customer={selectedCustomer}
-      />
     </div>
   );
 }

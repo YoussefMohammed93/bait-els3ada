@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { useCartStore } from "./use-cart";
+import { useSessionStore } from "./use-session";
+
 import { persist } from "zustand/middleware";
 import { api } from "@/convex/_generated/api";
 import { useEffect, useCallback } from "react";
@@ -36,7 +37,8 @@ export const useWishlistStore = create<WishlistState>()(
 
 export const useWishlist = () => {
   const store = useWishlistStore();
-  const { sessionId } = useCartStore(); // Use same sessionId as cart
+  const { sessionId } = useSessionStore(); // Use global sessionId
+
   const { isAuthenticated } = useConvexAuth();
 
   const toggleMutation = useMutation(api.favorites.toggle);

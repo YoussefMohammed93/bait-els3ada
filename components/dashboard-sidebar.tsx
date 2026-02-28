@@ -2,14 +2,6 @@
 
 import * as React from "react";
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Users,
-  Heart,
-  Grid,
-} from "lucide-react";
-import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
@@ -23,28 +15,19 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { Package, Users, Heart, Grid } from "lucide-react";
 
 const data = {
   navMain: [
-    {
-      title: "لوحة التحكم",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      title: "الفئات",
-      url: "/dashboard/categories",
-      icon: Grid,
-    },
     {
       title: "المنتجات",
       url: "/dashboard/products",
       icon: Package,
     },
     {
-      title: "الطلبات",
-      url: "/dashboard/orders",
-      icon: ShoppingCart,
+      title: "الفئات",
+      url: "/dashboard/categories",
+      icon: Grid,
     },
     {
       title: "العملاء",
@@ -71,7 +54,7 @@ export function DashboardSidebar({
               asChild
               className="hover:bg-transparent"
             >
-              <a href="/dashboard" className="flex items-center gap-3">
+              <a href="/dashboard/products" className="flex items-center gap-3">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Heart className="size-4 fill-current" />
                 </div>

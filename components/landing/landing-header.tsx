@@ -5,12 +5,11 @@ import {
   Menu,
   LogOut,
   LayoutDashboard,
-  Package,
   Settings,
   ChevronDown,
   LogIn,
-  ShoppingCart,
 } from "lucide-react";
+
 import Link from "next/link";
 import {
   Sheet,
@@ -25,7 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import NextImage from "next/image";
-import { useCart } from "@/hooks/use-cart";
+
 import { useEffect, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -35,7 +34,6 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { AuthDialog } from "@/components/auth/auth-form";
 import { SettingsDialog } from "@/components/auth/settings-dialog";
-import { MyOrdersDialog } from "@/components/orders/my-orders-dialog";
 import { FavoritesDialog } from "@/components/favorites/favorites-dialog";
 
 const SiteHeader = () => {
@@ -43,13 +41,12 @@ const SiteHeader = () => {
   const { signOut } = useAuthActions();
 
   const user = useQuery(api.users.currentUser);
-  const { totalItems } = useCart();
 
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [ordersOpen, setOrdersOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -98,22 +95,6 @@ const SiteHeader = () => {
             ))}
           </nav>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Cart Button */}
-            <Link href="/cart">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative h-10 w-10 rounded-full border bg-white hover:bg-primary/5 hover:text-primary transition-all group"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                {mounted && totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white ring-2 ring-background animate-in zoom-in">
-                    {totalItems}
-                  </span>
-                )}
-              </Button>
-            </Link>
-
             {!mounted || isLoading ? (
               <div className="flex items-center gap-2">
                 <Skeleton className="h-10 w-10 sm:w-32 rounded-full" />
@@ -198,14 +179,7 @@ const SiteHeader = () => {
                           <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
                             نشاطي
                           </p>
-                          <Button
-                            variant="ghost"
-                            onClick={() => setOrdersOpen(true)}
-                            className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
-                          >
-                            <Package className="h-4 w-4" />
-                            <span className="text-sm font-medium">طلباتي</span>
-                          </Button>
+
                           <Button
                             variant="ghost"
                             onClick={() => setFavoritesOpen(true)}
@@ -233,7 +207,7 @@ const SiteHeader = () => {
                             </span>
                           </Button>
                           {user?.userRole === "admin" && (
-                            <Link href="/dashboard" className="w-full">
+                            <Link href="/dashboard/products" className="w-full">
                               <Button
                                 variant="ghost"
                                 className="w-full justify-start gap-3 h-10 px-3 hover:bg-primary/5 hover:text-primary rounded-xl transition-colors"
@@ -326,7 +300,7 @@ const SiteHeader = () => {
         </div>
       </header>
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
-      <MyOrdersDialog open={ordersOpen} onOpenChange={setOrdersOpen} />
+
       <FavoritesDialog open={favoritesOpen} onOpenChange={setFavoritesOpen} />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>

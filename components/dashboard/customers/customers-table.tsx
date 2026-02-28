@@ -1,210 +1,154 @@
 "use client";
 
 import {
-  CheckCircle2,
-  XCircle,
   ChevronLeft,
   ChevronRight,
-  Eye,
+  User,
+  Mail,
+  Phone,
+  Calendar,
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-
-export interface Customer {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
-  totalOrders: number;
-  totalSpent: number;
-  status: "نشط" | "غير نشط";
-  joinDate: string;
-  lastOrderDate: string;
-}
+import { Doc } from "@/convex/_generated/dataModel";
 
 interface CustomersTableProps {
-  customers: Customer[];
+  customers: Doc<"users">[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  onViewDetails: (customer: Customer) => void;
 }
-
-const statusConfig: Record<
-  string,
-  { className: string; Icon: React.ElementType }
-> = {
-  نشط: {
-    className: "bg-emerald-500/10 text-emerald-600",
-    Icon: CheckCircle2,
-  },
-  "غير نشط": {
-    className: "bg-destructive/10 text-destructive",
-    Icon: XCircle,
-  },
-};
-
-const formatDate = (dateString: string) => {
-  if (!dateString) return "—";
-  
-  try {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("ar-EG", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(date);
-  } catch {
-    return dateString;
-  }
-};
 
 export function CustomersTable({
   customers,
   currentPage,
   totalPages,
   onPageChange,
-  onViewDetails,
 }: CustomersTableProps) {
   return (
-    <div>
-      {/* ── Desktop Table ── */}
+    <div className="space-y-4">
+      {/* Desktop Table */}
       <div className="hidden md:block rounded-2xl border bg-card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-sm min-w-[900px]">
+          <table className="w-full text-right text-sm min-w-[800px]">
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
+                <th className="px-5 py-3.5 font-bold w-[72px]">الصورة</th>
                 <th className="px-5 py-3.5 font-bold">الاسم</th>
+                <th className="px-5 py-3.5 font-bold">البريد الإلكتروني</th>
                 <th className="px-5 py-3.5 font-bold">رقم الهاتف</th>
-                <th className="px-5 py-3.5 font-bold">عدد الطلبات</th>
-                <th className="px-5 py-3.5 font-bold">إجمالي الإنفاق</th>
-                <th className="px-5 py-3.5 font-bold text-center">الحالة</th>
                 <th className="px-5 py-3.5 font-bold">تاريخ الانضمام</th>
-                <th className="px-5 py-3.5 font-bold text-center">الإجراءات</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
-              {customers.map((customer) => {
-                const { className: statusClass, Icon: StatusIcon } =
-                  statusConfig[customer.status];
-                return (
-                  <tr
-                    key={customer.id}
-                    className="hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="px-5 py-3 font-bold text-foreground">
-                      {customer.name}
-                    </td>
-                    <td
-                      className="px-5 py-3 text-muted-foreground font-medium text-sm tabular-nums"
-                      dir="ltr"
-                    >
-                      {customer.phone}
-                    </td>
-                    <td className="px-5 py-3 font-bold text-foreground tabular-nums">
-                      {customer.totalOrders}
-                    </td>
-                    <td className="px-5 py-3 font-bold text-sm tabular-nums whitespace-nowrap">
-                      {customer.totalSpent.toLocaleString("ar-EG")} ج.م
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex justify-center">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap ${statusClass}`}
-                        >
-                          <StatusIcon className="size-3.5" />
-                          {customer.status}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground font-bold text-base tabular-nums whitespace-nowrap">
-                      {formatDate(customer.joinDate)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center justify-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onViewDetails(customer)}
-                          className="rounded-lg h-8 px-2.5 text-xs font-bold gap-1 text-primary hover:text-primary hover:bg-primary/10"
-                        >
-                          <Eye className="size-3.5" />
-                          عرض
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+            <tbody className="divide-y border-t">
+              {customers.map((user) => (
+                <tr
+                  key={user._id}
+                  className="hover:bg-muted/30 transition-colors"
+                >
+                  <td className="px-5 py-3">
+                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden border">
+                      {user.image ? (
+                        <Image
+                          src={user.image}
+                          alt={user.name || "User"}
+                          width={40}
+                          height={40}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <User className="size-5 text-primary/40" />
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-5 py-3">
+                    <p className="font-bold text-foreground">
+                      {user.name || "بدون اسم"}
+                    </p>
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                      <Mail className="size-3.5" />
+                      {user.email || "---"}
+                    </div>
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2 text-muted-foreground font-medium tabular-nums">
+                      <Phone className="size-3.5" />
+                      {user.phone || "---"}
+                    </div>
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground font-medium tabular-nums">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="size-3.5" />
+                      {user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString("ar-EG")
+                        : "---"}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Mobile Cards ── */}
+      {/* Mobile Cards View */}
       <div className="md:hidden space-y-3">
-        {customers.map((customer) => {
-          const { className: statusClass, Icon: StatusIcon } =
-            statusConfig[customer.status];
-          return (
-            <div
-              key={customer.id}
-              className="rounded-2xl border bg-card p-4 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-foreground text-base">
-                  {customer.name}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${statusClass}`}
-                >
-                  <StatusIcon className="size-3.5" />
-                  {customer.status}
-                </span>
+        {customers.map((user) => (
+          <div
+            key={user._id}
+            className="rounded-2xl border bg-card p-4 space-y-3"
+          >
+            <div className="flex items-center gap-3">
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden border shrink-0">
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt={user.name || "User"}
+                    width={48}
+                    height={48}
+                    className="object-cover"
+                  />
+                ) : (
+                  <User className="size-6 text-primary/40" />
+                )}
               </div>
-
-              <div className="flex items-center justify-between gap-6 border-t pt-3 text-sm">
-                <div>
-                  <span className="text-sm text-muted-foreground font-bold block">
-                    الطلبات
-                  </span>
-                  <span className="font-bold text-foreground text-sm tabular-nums">
-                    {customer.totalOrders}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground font-bold block">
-                    الإنفاق
-                  </span>
-                  <span className="font-bold text-foreground text-sm tabular-nums">
-                    {customer.totalSpent.toLocaleString("ar-EG")} ج.م
-                  </span>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground font-bold block">
-                    الانضمام
-                  </span>
-                  <span className="font-bold text-foreground text-sm tabular-nums">
-                    {formatDate(customer.joinDate)}
-                  </span>
-                </div>
+              <div className="min-w-0">
+                <p className="font-bold text-foreground truncate">
+                  {user.name || "بدون اسم"}
+                </p>
+                <p className="text-xs text-muted-foreground truncate font-medium">
+                  {user.email || "بدون بريد"}
+                </p>
               </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewDetails(customer)}
-                className="w-full rounded-xl h-9 text-xs font-bold gap-1.5 text-primary border-primary/20 hover:bg-primary/5"
-              >
-                <Eye className="size-3.5" />
-                عرض التفاصيل
-              </Button>
             </div>
-          );
-        })}
+
+            <div className="grid grid-cols-2 gap-4 border-t pt-3">
+              <div>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tight block">
+                  الهاتف
+                </span>
+                <span className="text-sm font-bold tabular-nums">
+                  {user.phone || "---"}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tight block">
+                  انضم في
+                </span>
+                <span className="text-sm font-bold tabular-nums">
+                  {user.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString("ar-EG")
+                    : "---"}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 px-1">
           <p className="text-sm text-muted-foreground font-medium">

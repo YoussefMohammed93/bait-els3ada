@@ -208,7 +208,7 @@ export default function CategoriesPage() {
       </div>
 
       {/* Search */}
-      <div className="rounded-2xl border bg-card p-4">
+      <div className="rounded-2xl">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -216,7 +216,7 @@ export default function CategoriesPage() {
               placeholder="ابحث عن فئة..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pr-10 rounded-xl h-10 font-medium"
+              className="pr-10 rounded-xl bg-card h-10 font-medium"
             />
           </div>
           {search && (
