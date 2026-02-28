@@ -30,7 +30,7 @@ const ContactSection = () => {
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full shadow-none text-lg px-8 py-6 w-full sm:w-auto border-primary/30 text-foreground hover:bg-accent hover:border-primary/50 transition-colors"
+              className="rounded-full shadow-none text-lg px-8 py-6 w-full sm:w-auto border-primary/30 text-foreground hover:bg-muted hover:border-border transition-colors"
               asChild
             >
               <a href="tel:01017986283">

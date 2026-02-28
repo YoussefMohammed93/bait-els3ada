@@ -38,6 +38,10 @@ export const metadata: Metadata = {
     locale: "ar_EG",
     type: "website",
   },
+  icons: {
+    icon: "/logo.jpeg",
+    apple: "/logo.jpeg",
+  },
 };
 
 import { TooltipProvider } from "@/components/ui/tooltip";

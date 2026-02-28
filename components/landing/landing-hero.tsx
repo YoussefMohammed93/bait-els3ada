@@ -34,20 +34,30 @@ const HeroSection = () => {
             وجهتك المثالية للميكب والإكسسوارات والهدايا المميزة والمنتجات
             اليدوية الفريدة. كل ما تحتاجينه لإطلالة ساحرة ولحظات لا تُنسى.
           </p>
-          <Button
-            size="lg"
-            className="w-full sm:w-auto rounded-full text-lg px-8 py-6"
-            asChild
-          >
-            <a
-              href="https://wa.me/201017986283"
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Button
+              size="lg"
+              className="w-full sm:w-auto rounded-full text-lg px-8 py-6"
+              asChild
             >
-              <MessageCircle className="h-5 w-5" />
-              تواصل معنا الآن
-            </a>
-          </Button>
+              <a
+                href="https://wa.me/201017986283"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-5 w-5" />
+                تواصل معنا الآن
+              </a>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto rounded-full text-lg px-8 py-6 bg-white hover:bg-muted border-border transition-all"
+              asChild
+            >
+              <a href="/products">تصفح المنتجات</a>
+            </Button>
+          </div>
         </div>
       </div>
     </section>

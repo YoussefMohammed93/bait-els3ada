@@ -1,11 +1,12 @@
+import dynamic from "next/dynamic";
+
 import HeroSection from "@/components/landing/landing-hero";
 import SiteFooter from "@/components/landing/landing-footer";
 import SiteHeader from "@/components/landing/landing-header";
 import AboutSection from "@/components/landing/landing-about";
-// import ContactSection from "@/components/landing/landing-contact";
+import ContactSection from "@/components/landing/landing-contact";
 import ServicesSection from "@/components/landing/landing-services";
 import LandingProducts from "@/components/landing/landing-products";
-import dynamic from "next/dynamic";
 
 const LocationSection = dynamic(
   () => import("@/components/landing/landing-location"),
@@ -30,7 +31,7 @@ export default function LandingPage() {
         <ServicesSection />
         <LandingProducts />
         <LocationSection />
-        {/* <ContactSection /> */}
+        <ContactSection />
       </main>
       <SiteFooter />
     </>
