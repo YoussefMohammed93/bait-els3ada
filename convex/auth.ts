@@ -26,7 +26,11 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   callbacks: {
     async createOrUpdateUser(ctx, args) {
       if (args.existingUserId) {
-        return args.existingUserId;
+        const user = await ctx.db.get(args.existingUserId);
+
+        if (user) {
+          return args.existingUserId;
+        }
       }
       return await ctx.db.insert("users", {
         ...args.profile,

@@ -1,7 +1,22 @@
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 
 export default defineSchema({
+  ...authTables,
+
+  accounts: defineTable({
+    userId: v.id("users"),
+    provider: v.string(),
+    providerAccountId: v.string(),
+    secret: v.optional(v.string()),
+  }).index("userId", ["userId"]),
+
+  sessions: defineTable({
+    userId: v.id("users"),
+    expirationTime: v.number(),
+  }).index("userId", ["userId"]),
+
   users: defineTable({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
@@ -33,45 +48,6 @@ export default defineSchema({
     slug: v.string(),
     image: v.optional(v.string()),
   }),
-
-  carts: defineTable({
-    userId: v.optional(v.id("users")),
-    sessionId: v.optional(v.string()),
-    items: v.array(
-      v.object({
-        productId: v.id("products"),
-        quantity: v.number(),
-      }),
-    ),
-    lastUpdated: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_session", ["sessionId"]),
-
-  orders: defineTable({
-    customerId: v.union(v.id("users"), v.string()),
-    customerName: v.string(),
-    phone: v.string(),
-    address: v.string(),
-    governorate: v.string(),
-    items: v.array(
-      v.object({
-        productId: v.id("products"),
-        productName: v.string(),
-        productImage: v.optional(v.string()),
-        price: v.number(),
-        quantity: v.number(),
-      }),
-    ),
-    totalAmount: v.number(),
-    status: v.string(),
-    paymentMethod: v.string(),
-    paymentStatus: v.string(),
-    senderWallet: v.optional(v.string()),
-    createdAt: v.number(),
-  })
-    .index("by_customer", ["customerId"])
-    .index("by_created_at", ["createdAt"]),
 
   favorites: defineTable({
     userId: v.optional(v.id("users")),

@@ -60,7 +60,7 @@ const WhatsAppButton = () => {
       </TooltipTrigger>
       <TooltipContent
         side="right"
-        className="bg-[#20b958] text-white border border-border px-3 py-1.5 rounded-xl font-bold shadow-xl shadow-black/5"
+        className="bg-[#20b958] text-white px-3 py-1.5 rounded-xl font-bold shadow-xl shadow-black/5"
         sideOffset={14}
       >
         تواصل معنا على واتساب

@@ -16,10 +16,13 @@ const SiteFooter = () => {
         <div className="py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 text-2xl font-bold text-primary-foreground">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-2xl font-bold text-primary-foreground"
+            >
               <Heart className="h-6 w-6 text-primary fill-primary" />
               بيت السعادة
-            </div>
+            </Link>
             <p className="text-primary-foreground/60 text-sm leading-relaxed max-w-xs">
               وجهتك المثالية للميكب والإكسسوارات والهدايا المميزة والمنتجات
               اليدوية الفريدة ✨
@@ -62,7 +65,7 @@ const SiteFooter = () => {
                   width={24}
                   height={24}
                 />
-                <span dir="ltr">01017986283</span>
+                <span dir="ltr">اتصل بنا</span>
               </a>
               <a
                 href="https://wa.me/201017986283"
@@ -119,6 +122,20 @@ const SiteFooter = () => {
           <p className="text-primary-foreground/50 text-xs font-medium">
             © {new Date().getFullYear()} بيت السعادة — جميع الحقوق محفوظة
           </p>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/privacy"
+              className="text-primary-foreground/40 hover:text-primary text-xs sm:text-[13px] font-medium transition-colors"
+            >
+              سياسة الخصوصية
+            </Link>
+            <Link
+              href="/terms"
+              className="text-primary-foreground/40 hover:text-primary text-xs sm:text-[13px] font-medium transition-colors"
+            >
+              شروط الخدمة
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

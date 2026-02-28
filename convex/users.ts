@@ -62,3 +62,45 @@ export const generateUploadUrl = mutation({
     return await ctx.storage.generateUploadUrl();
   },
 });
+export const deleteUser = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) {
+      throw new Error("غير مصرح لك بالقيام بهذا الإجراء");
+    }
+
+    // Delete user's favorites first
+    const favorites = await ctx.db
+      .query("favorites")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    if (favorites) {
+      await ctx.db.delete(favorites._id);
+    }
+
+    // Delete associated accounts
+    const accounts = await ctx.db
+      .query("accounts")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .collect();
+
+    for (const account of accounts) {
+      await ctx.db.delete(account._id);
+    }
+
+    // Delete associated sessions
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .collect();
+
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
+
+    // Delete the user
+    await ctx.db.delete(userId);
+  },
+});
